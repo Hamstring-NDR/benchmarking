@@ -318,7 +318,7 @@ class BaseTest:
         """
         sql_file = (
             BASE_DIR
-            / "src"
+            / "resources"
             / "sql"
             / "entering_processed"
             / "activity_last_three_minutes.sql"
@@ -361,7 +361,7 @@ class BaseTest:
         """
         self.__validate_filename(file_identifier)  # e.g. 20250709_202118_burst
 
-        sql_directory_path = BASE_DIR / "src" / "sql"
+        sql_directory_path = BASE_DIR / "resources" / "sql"
         subdirectory_names = [
             "entering_processed",
             "latencies",
