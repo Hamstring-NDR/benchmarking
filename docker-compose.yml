@@ -2,8 +2,8 @@ services:
   benchmark_test_runner:
     container_name: benchmark_test_runner
     build:
-      context: ..
-      dockerfile: src/Dockerfile
+      context: .
+      dockerfile: resources/Dockerfile
       network: host
     networks:
       - docker_heidgaf

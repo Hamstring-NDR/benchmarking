@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt, ticker
 
-from src.utils import ReadWriteUtils
-from src.base.log_config import get_logger
+from src.base.utils import ReadWriteUtils
+from src.base.logging_config import get_logger
 
 logger = get_logger()
 

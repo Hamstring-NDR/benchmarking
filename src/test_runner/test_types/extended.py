@@ -4,15 +4,13 @@ import time
 from abc import abstractmethod
 from datetime import datetime, timedelta
 
-from confluent_kafka import KafkaException
-
 sys.path.append(os.getcwd())
 from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
 )
 from src.base.utils import setup_config
 from src.test_runner.test_types.base import BaseTest
-from src.base.log_config import get_logger
+from src.base.logging_config import get_logger
 
 logger = get_logger()
 config = setup_config()
@@ -241,8 +239,9 @@ class SingleIntervalTest(BaseTest):
                 )
 
                 current_index += 1
-            except KafkaException:
-                logger.error(KafkaException)
+            except Exception as err:
+                logger.error(f"{err=}")
+
             time.sleep(1.0 / messages_per_second)
 
         self.progress_bar.update(100)

@@ -4,11 +4,11 @@ import sys
 
 sys.path.append(os.getcwd())
 from src.test_runner.test_types.main import *
-from src.base.log_config import get_logger
-from src.utils import ReadWriteUtils
+from src.base.logging_config import get_logger
+from src.base.setup_config import setup_config
 
 logger = get_logger()
-benchmark_test_config = ReadWriteUtils.setup_config()
+benchmark_test_config = setup_config()
 
 test_config = benchmark_test_config["tests"]
 

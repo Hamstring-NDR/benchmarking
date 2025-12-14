@@ -6,7 +6,7 @@ from pathlib import Path
 import pymupdf
 
 sys.path.append(os.getcwd())
-from src.base.log_config import get_logger
+from src.base.logging_config import get_logger
 from src.test_runner.plotting.boxes import (
     MainTitleBox,
     SectionTitleBox,
@@ -20,7 +20,7 @@ from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
     RampUpMetadata,
 )
-from src.utils import ReadWriteUtils
+from src.base.utils import ReadWriteUtils
 from src.test_runner.plotting.plot_generator import (
     LatencyComparisonPlotGenerator,
     EnteringProcessedTotalPlotGenerator,

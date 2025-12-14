@@ -4,11 +4,11 @@ import subprocess
 import sys
 
 sys.path.append(os.getcwd())
-from src.base.log_config import get_logger
-from src.utils import ReadWriteUtils
+from src.base.logging_config import get_logger
+from src.base.setup_config import setup_config
 
 logger = get_logger()
-benchmark_test_config = ReadWriteUtils.setup_config()
+benchmark_test_config = setup_config()
 
 
 class BenchmarkController:
@@ -50,7 +50,7 @@ class BenchmarkController:
             # "exec",
             # docker_container_name,
             "python",
-            f"benchmarking/test_runner/benchmark_test_runner.py",
+            f"src/test_runner/benchmark_test_runner.py",
             test_name,
             *arguments,
         ]

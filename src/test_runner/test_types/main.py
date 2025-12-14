@@ -13,7 +13,7 @@ from src.test_runner.test_types.extended import (
     SingleIntervalTest,
     IntervalBasedTest,
 )
-from src.base.log_config import get_logger
+from src.base.logging_config import get_logger
 
 logger = get_logger()
 

@@ -29,9 +29,9 @@ from src.test_runner.plotting.plot_generator import (
 )
 from src.base.kafka_handler import SimpleKafkaProduceHandler
 from src.base.utils import setup_config, TimeUtils
-from src.train.dataset import Dataset, DatasetLoader
-from src.base.log_config import get_logger
-from src.utils import ReadWriteUtils
+from src.base.dataset import Dataset, DatasetLoader
+from src.base.logging_config import get_logger
+from src.base.utils import ReadWriteUtils
 
 logger = get_logger()
 config = setup_config()
