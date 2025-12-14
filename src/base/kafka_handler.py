@@ -1,15 +1,7 @@
-"""
-The Write-Exactly-Once-Semantics used by the :class:`KafkaHandler` is shown by
-https://github.com/confluentinc/confluent-kafka-python/blob/master/examples/eos-transactions.py,
-parts of which are similar to the code in this module.
-"""
-
 import os
-import sys
 
 import kafka
 
-sys.path.append(os.getcwd())
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
 

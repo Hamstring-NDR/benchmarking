@@ -1,11 +1,7 @@
-import os
-import sys
-
 import yaml
 
-sys.path.append(os.getcwd())
-from src.base.logging_config import get_logger
 from src.base import CONFIG_FILEPATH
+from src.base.logging_config import get_logger
 
 logger = get_logger()
 

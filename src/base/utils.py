@@ -1,14 +1,11 @@
-import os
-import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
 
-sys.path.append(os.getcwd())
+from src.base import BASE_DIR, DIRECTORY_STRUCTURE_FILEPATH
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
-from src.base import BASE_DIR, DIRECTORY_STRUCTURE_FILEPATH
 
 logger = get_logger()
 config = setup_config()

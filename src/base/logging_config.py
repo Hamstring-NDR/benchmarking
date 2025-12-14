@@ -1,12 +1,9 @@
 import logging
-import os
-import sys
 from typing import Dict, Any
 
 import colorlog
 import yaml
 
-sys.path.append(os.getcwd())
 from src.base import CONFIG_FILEPATH
 
 # Global formatting for all loggers

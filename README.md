@@ -78,6 +78,12 @@ sh install_requirements.sh
 ```
 Alternatively, you can use `pip install` and enter all needed requirements individually with `-r requirements.*.txt`.
 
+IMPORTANT: You must install the project in editable mode for imports to work correctly:
+
+```sh
+pip install -e .
+```
+
 Now, you can start each stage, e.g. the inspector:
 
 ```sh
