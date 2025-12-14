@@ -417,6 +417,7 @@ class BenchmarkDatasetGenerator:
         datasets = DatasetLoader(base_path=data_base_path, max_rows=10000)
 
         dataset = Dataset(
+            name="test_name",
             data_path="",
             data=pl.concat(
                 [
