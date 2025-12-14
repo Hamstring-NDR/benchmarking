@@ -4,7 +4,7 @@ from typing import Dict, Any
 import colorlog
 import yaml
 
-from src.base import CONFIG_FILEPATH
+from src import CONFIG_FILEPATH
 
 # Global formatting for all loggers
 log_colors = {

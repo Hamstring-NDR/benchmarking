@@ -1,11 +1,13 @@
 import argparse
-import os
-import sys
 
-sys.path.append(os.getcwd())
-from src.test_runner.test_types.main import *
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
+from src.test_runner.test_types.main import (
+    BurstTest,
+    RampUpTest,
+    MaximumThroughputTest,
+    LongTermTest,
+)
 
 logger = get_logger()
 benchmark_test_config = setup_config()

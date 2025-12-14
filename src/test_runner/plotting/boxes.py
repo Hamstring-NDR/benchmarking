@@ -1,13 +1,10 @@
 import datetime
-import os
-import sys
 from abc import abstractmethod
 from pathlib import Path
 from typing import Optional
 
 import pymupdf
 
-sys.path.append(os.getcwd())
 from src.test_runner.plotting.metadata_information import (
     SingleMetadataInformation,
 )

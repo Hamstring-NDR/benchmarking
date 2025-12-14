@@ -1,9 +1,6 @@
-import os
 import re
 import subprocess
-import sys
 
-sys.path.append(os.getcwd())
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
 

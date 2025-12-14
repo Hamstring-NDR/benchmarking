@@ -1,9 +1,7 @@
 import ipaddress
-import os
 import random
 import re
 import subprocess
-import sys
 import time
 from abc import abstractmethod
 from datetime import datetime, timedelta
@@ -13,12 +11,17 @@ from typing import Optional, Any
 import polars as pl
 import progressbar
 
-sys.path.append(os.getcwd())
-from src.test_runner.plotting.pdf_overview_generator import (
-    PDFOverviewGenerator,
-)
+from src import BASE_DIR
+from src.base.dataset import Dataset, DatasetLoader
+from src.base.kafka_handler import SimpleKafkaProduceHandler
+from src.base.logging_config import get_logger
+from src.base.utils import ReadWriteUtils
+from src.base.utils import TimeUtils
 from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
+)
+from src.test_runner.plotting.pdf_overview_generator import (
+    PDFOverviewGenerator,
 )
 from src.test_runner.plotting.plot_generator import (
     LatencyComparisonPlotGenerator,
@@ -27,31 +30,9 @@ from src.test_runner.plotting.plot_generator import (
     LatenciesBoxplotGenerator,
     EnteringProcessedPerTimePlotGenerator,
 )
-from src.base.kafka_handler import SimpleKafkaProduceHandler
-from src.base.utils import setup_config, TimeUtils
-from src.base.dataset import Dataset, DatasetLoader
-from src.base.logging_config import get_logger
-from src.base.utils import ReadWriteUtils
+from src.test_runner.test_types import LATENCIES_COMPARISON_FILENAME, CLICKHOUSE_CONTAINER_NAME
 
 logger = get_logger()
-config = setup_config()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # heiDGAF directory
-PRODUCE_TO_TOPIC: str = config["environment"]["kafka_topics"]["pipeline"][
-    "logserver_in"
-]
-LATENCIES_COMPARISON_FILENAME: str = "latency_comparison.png"
-MODULE_TO_CSV_FILENAME: dict[str, str] = {
-    "Batch Handler": "batch_handler.csv",
-    "Collector": "collector.csv",
-    "Detector": "detector.csv",
-    "Inspector": "inspector.csv",
-    "Log Server": "logserver.csv",
-    "Prefilter": "prefilter.csv",
-}
-CLICKHOUSE_CONTAINER_NAME: str = config["environment"]["monitoring"][
-    "clickhouse_server"
-]["hostname"]
 
 
 class BaseTest:

@@ -1,7 +1,4 @@
-import os
-import sys
-
-sys.path.append(os.getcwd())
+from src.base.logging_config import get_logger
 from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
     RampUpMetadata,
@@ -13,7 +10,6 @@ from src.test_runner.test_types.extended import (
     SingleIntervalTest,
     IntervalBasedTest,
 )
-from src.base.logging_config import get_logger
 
 logger = get_logger()
 

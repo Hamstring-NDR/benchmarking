@@ -1,18 +1,15 @@
 import datetime
 from abc import abstractmethod
-from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt, ticker
 
-from src.base.utils import ReadWriteUtils
 from src.base.logging_config import get_logger
+from src.base.utils import ReadWriteUtils
 
 logger = get_logger()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # project root directory
 
 
 class PlotGenerator:

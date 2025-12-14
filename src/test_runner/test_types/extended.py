@@ -1,21 +1,17 @@
-import os
-import sys
 import time
 from abc import abstractmethod
 from datetime import datetime, timedelta
 
-sys.path.append(os.getcwd())
+from src.base.logging_config import get_logger
+from src.base.utils import setup_config
 from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
 )
-from src.base.utils import setup_config
+from src.test_runner.test_types import PRODUCE_TO_TOPIC
 from src.test_runner.test_types.base import BaseTest
-from src.base.logging_config import get_logger
 
 logger = get_logger()
 config = setup_config()
-
-PRODUCE_TO_TOPIC = config["environment"]["kafka_topics"]["pipeline"]["logserver_in"]
 
 
 class IntervalBasedTest(BaseTest):

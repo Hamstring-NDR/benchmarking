@@ -3,7 +3,7 @@ from pathlib import Path
 
 import yaml
 
-from src.base import BASE_DIR, DIRECTORY_STRUCTURE_FILEPATH
+from src import BASE_DIR, DIRECTORY_STRUCTURE_FILEPATH
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
 

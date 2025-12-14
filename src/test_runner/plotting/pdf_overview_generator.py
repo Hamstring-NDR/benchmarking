@@ -1,12 +1,12 @@
 import datetime
 import os.path
-import sys
 from pathlib import Path
 
 import pymupdf
 
-sys.path.append(os.getcwd())
+from src import BASE_DIR
 from src.base.logging_config import get_logger
+from src.base.utils import ReadWriteUtils
 from src.test_runner.plotting.boxes import (
     MainTitleBox,
     SectionTitleBox,
@@ -20,7 +20,6 @@ from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
     RampUpMetadata,
 )
-from src.base.utils import ReadWriteUtils
 from src.test_runner.plotting.plot_generator import (
     LatencyComparisonPlotGenerator,
     EnteringProcessedTotalPlotGenerator,
@@ -30,8 +29,6 @@ from src.test_runner.plotting.plot_generator import (
 )
 
 logger = get_logger()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # heiDGAF directory
 
 
 class PDFOverviewGenerator:
