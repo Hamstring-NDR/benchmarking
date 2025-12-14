@@ -1,11 +1,13 @@
 import logging
 import os
+import sys
 from typing import Dict, Any
 
 import colorlog
 import yaml
 
-CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), "../config.yaml")
+sys.path.append(os.getcwd())
+from src.base import CONFIG_FILEPATH
 
 # Global formatting for all loggers
 log_colors = {

@@ -1,16 +1,13 @@
 import os
 import sys
-from pathlib import Path
 
 import yaml
 
 sys.path.append(os.getcwd())
 from src.base.logging_config import get_logger
+from src.base import CONFIG_FILEPATH
 
 logger = get_logger()
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent  # project root directory
-CONFIG_FILEPATH = BASE_DIR / "src" / "config.yaml"
 
 
 def setup_config():

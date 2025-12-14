@@ -93,4 +93,3 @@ class SimpleKafkaProduceHandler:
         """
         if hasattr(self, "producer"):
             self.producer.flush()
-

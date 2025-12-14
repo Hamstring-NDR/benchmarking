@@ -8,16 +8,10 @@ import yaml
 sys.path.append(os.getcwd())
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
+from src.base import BASE_DIR, DIRECTORY_STRUCTURE_FILEPATH
 
 logger = get_logger()
 config = setup_config()
-
-BASE_DIR = Path(__file__).resolve().parent.parent  # project root directory
-
-CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), "./config.yaml")
-DIRECTORY_STRUCTURE_FILEPATH = os.path.join(
-    os.path.dirname(__file__), "./data_directory_structure.yaml"
-)
 
 
 class ReadWriteUtils:
