@@ -1,157 +1,107 @@
-import ipaddress
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 import yaml
-from confluent_kafka import KafkaError, Message
 
 sys.path.append(os.getcwd())
-from src.base.log_config import get_logger
+from src.base.logging_config import get_logger
+from src.base.setup_config import setup_config
 
 logger = get_logger()
+config = setup_config()
 
-CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), "../../config.yaml")
+BASE_DIR = Path(__file__).resolve().parent.parent  # project root directory
 
-
-def setup_config():
-    """Load and return the application configuration from the YAML configuration file.
-
-    Reads the configuration file from the predefined CONFIG_FILEPATH and parses
-    it as a YAML document. This function provides centralized configuration
-    loading for the entire application.
-
-    Returns:
-        dict: Configuration data as a Python dictionary containing all
-              application settings and parameters.
-
-    Raises:
-        FileNotFoundError: If the configuration file does not exist at the
-                           expected path.
-        yaml.YAMLError: If the configuration file contains invalid YAML syntax.
-    """
-    try:
-        logger.debug(f"Opening configuration file at {CONFIG_FILEPATH}...")
-        with open(CONFIG_FILEPATH, "r") as file:
-            config = yaml.safe_load(file)
-    except FileNotFoundError:
-        logger.critical(f"File {CONFIG_FILEPATH} does not exist. Aborting...")
-        raise
-
-    logger.debug("Configuration file successfully opened and information returned.")
-    return config
+CONFIG_FILEPATH = os.path.join(os.path.dirname(__file__), "./config.yaml")
+DIRECTORY_STRUCTURE_FILEPATH = os.path.join(
+    os.path.dirname(__file__), "./data_directory_structure.yaml"
+)
 
 
-def kafka_delivery_report(err: None | KafkaError, msg: None | Message):
-    """
-    Delivery report used by Kafka Producers. Specifies the format of the returned messages during producing.
-    """
-    if err:
-        logger.warning("Message delivery failed: {}".format(err))
-    else:
-        logger.debug(
-            "Message delivered to topic={} [partition={}]".format(
-                msg.topic(), msg.partition()
-            )
+class ReadWriteUtils:
+
+    @staticmethod
+    def write_metadata(metadata_filepath: Path, data: dict):
+        try:
+            with open(metadata_filepath, "w") as file:
+                yaml.dump(data, file, default_flow_style=False)
+        except FileNotFoundError:
+            logger.critical(f"File {metadata_filepath} does not exist. Aborting...")
+            raise
+
+    @staticmethod
+    def get_metadata(test_identifier: str):
+        metadata_filepath = Path(
+            BASE_DIR / "benchmark_results" / test_identifier / "metadata.yml"
         )
 
-
-class ValidationUtils:
-    @staticmethod
-    def validate_host(
-        host: int | str | bytes | ipaddress.IPv4Address | ipaddress.IPv6Address,
-    ) -> ipaddress.IPv4Address | ipaddress.IPv6Address:
-        """
-        Checks if the given host is a valid IP address. If it is, the IP address is returned with IP address type.
-
-        Args:
-            host (int | str | bytes | IPv4Address | IPv6Address): Host IP address to be checked
-
-        Returns:
-            Correct IP address as ipaddress.IPv4Address or ipaddress.IPv6Address type.
-
-        Raises:
-            ValueError: Invalid host IP address format
-        """
         try:
-            host = ipaddress.ip_address(host)
-        except Exception as err:
-            raise ValueError(f"Invalid host: {host}, {err=}")
+            with open(metadata_filepath, "r") as file:
+                data = yaml.safe_load(file)
+        except FileNotFoundError:
+            logger.critical(f"File {metadata_filepath} does not exist. Aborting...")
+            raise
 
-        return host
+        return data
 
     @staticmethod
-    def validate_port(port: int) -> int:
-        """
-        Checks if the given port number is in the valid port number range. If it is, the port is returned.
+    def get_modules_to_csv_filepaths(for_plot: str, test_identifier: str):
+        try:
+            with open(DIRECTORY_STRUCTURE_FILEPATH, "r") as file:
+                data = yaml.safe_load(file)
+        except FileNotFoundError:
+            logger.critical(
+                f"File {DIRECTORY_STRUCTURE_FILEPATH} does not exist. Aborting..."
+            )
+            raise
 
-        Args:
-            port (int): Port number to be checked
+        try:
+            result = data[for_plot]["files"]
+        except KeyError:
+            logger.critical(
+                f"Invalid data directory structure configuration or given plot name does not exist"
+            )
+            raise
 
-        Returns:
-            Validated port number as integer
-
-        Raises:
-            ValueError: Port number not in valid port number range
-            TypeError: Invalid type for port number, must be int
-        """
-        if not isinstance(port, int):
-            raise TypeError
-
-        if not (1 <= port <= 65535):
-            raise ValueError(f"Invalid port: {port}")
-
-        return port
-
-
-class IpAddressUtils:
-    @staticmethod
-    def normalize_ipv4_address(
-        address: ipaddress.IPv4Address, prefix_length: int
-    ) -> tuple[ipaddress.IPv4Address, int]:
-        """
-        Returns the first part of an IPv4 address, the rest is filled with 0. For example:
-        >>> IpAddressUtils.normalize_ipv4_address(ipaddress.IPv4Address("255.255.255.255"), 23)
-        (IPv4Address('255.255.254.0'), 23)
-        >>> IpAddressUtils.normalize_ipv4_address(ipaddress.IPv4Address("172.126.15.3"), 8)
-        (IPv4Address('172.0.0.0'), 8)
-
-        Args:
-            address (ipaddress.IPv4Address): The IPv4 address to get the subnet ID of
-            prefix_length (int): Prefix length to be used for the subnet ID
-
-        Returns:
-            Subnet ID of the given IP address
-        """
-        if not (0 <= prefix_length <= 32):
-            raise ValueError(
-                "Invalid prefix length for IPv4. Must be between 0 and 32."
+        for module in result.keys():
+            filename = result[module]
+            result[module] = str(
+                Path(
+                    BASE_DIR / "benchmark_results" / test_identifier / "data" / filename
+                )
             )
 
-        net = ipaddress.IPv4Network((address, prefix_length), strict=False)
-        return net.network_address, prefix_length
+        return result
 
     @staticmethod
-    def normalize_ipv6_address(
-        address: ipaddress.IPv6Address, prefix_length: int
-    ) -> tuple[ipaddress.IPv6Address, int]:
-        """
-        Returns the first part of an IPv6 address, the rest is filled with 0.
-
-        Args:
-            address (ipaddress.IPv6Address): The IPv6 address to get the subnet ID of
-            prefix_length (int): Prefix length to be used for the subnet ID
-
-        Returns:
-            Subnet ID of the given IP address
-        """
-        if not (0 <= prefix_length <= 128):
-            raise ValueError(
-                "Invalid prefix length for IPv6. Must be between 0 and 128."
+    def get_plot_output_filepath(for_plot: str, file_identifier: str):
+        try:
+            with open(DIRECTORY_STRUCTURE_FILEPATH, "r") as file:
+                data = yaml.safe_load(file)
+        except FileNotFoundError:
+            logger.critical(
+                f"File {DIRECTORY_STRUCTURE_FILEPATH} does not exist. Aborting..."
             )
+            raise
 
-        net = ipaddress.IPv6Network((address, prefix_length), strict=False)
-        return net.network_address, prefix_length
+        try:
+            output_filename = data[for_plot]["output_filename"]
+        except KeyError:
+            logger.critical(
+                f"Invalid data directory structure configuration or given plot name does not exist"
+            )
+            raise
+
+        output_filename = Path(
+            BASE_DIR
+            / "benchmark_results"
+            / file_identifier
+            / "graphs"
+            / output_filename
+        )
+        return output_filename
 
 
 class TimeUtils:
@@ -160,33 +110,3 @@ class TimeUtils:
         """Returns the current UTC time as timezone-aware datetime timestamp.
         Must be used for all internal timestamps."""
         return datetime.now(timezone.utc)
-
-    @staticmethod
-    def from_formatted_string(timestamp_as_string: str) -> datetime:
-        """
-        Returns the datetime timestamp for a given string,
-        that uses the pattern/format set in the configuration for the 'timestamp' logline field.
-
-        Args:
-            timestamp_as_string (str): String of the timestamp in format of field 'timestamp'
-
-        Returns:
-            Timestamp as datetime.datetime
-        """
-        config = setup_config()
-
-        for field in config["pipeline"]["log_collection"]["collector"][
-            "logline_format"
-        ]:
-            if field[0] == "timestamp":
-                if len(field) != 3 or not isinstance(field[2], str):
-                    raise ValueError("Invalid Timestamp parameters")
-
-                return datetime.strptime(
-                    timestamp_as_string,
-                    field[2],  # corresponds to the pattern
-                )
-
-        raise RuntimeError(
-            f"Timestamp format could not be fetched from the configuration"
-        )
