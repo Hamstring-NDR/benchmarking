@@ -5,14 +5,13 @@ import kafka
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
 
-logger = get_logger()
-config = setup_config()
+LOGGER = get_logger()
+CONFIG = setup_config()
 
 HOSTNAME = os.getenv("HOSTNAME", "default_tid")
 CONSUMER_GROUP_ID = os.getenv("GROUP_ID", "default_gid")
 NUMBER_OF_INSTANCES = int(os.getenv("NUMBER_OF_INSTANCES", 1))
-
-KAFKA_BROKERS = config["environment"]["kafka_brokers"]
+KAFKA_BROKERS = CONFIG["environment"]["kafka_brokers"]
 
 
 class SimpleKafkaProduceHandler:
@@ -38,7 +37,7 @@ class SimpleKafkaProduceHandler:
             "enable_idempotence": False,
             "acks": 1,
         }
-        logger.info(f"Initializing KafkaProducer with brokers: {self.brokers}")
+        LOGGER.info(f"Initializing KafkaProducer with brokers: {self.brokers}")
         self.producer = kafka.KafkaProducer(**conf)
 
     def produce(self, topic: str, data: str, key: None | str = None) -> None:
@@ -66,16 +65,12 @@ class SimpleKafkaProduceHandler:
             key=key,
             value=data.encode(),
         )
-        # Block until the message is sent (or at least buffered and acked by leader)
-        # This effectively makes it synchronous, but safer for small batches/debugging.
-        # If high throughput is needed, we should remove flush() from here and only call it periodically or at exit.
-        # But given the user approved "Move flush after send", we do this.
         self.producer.flush()
 
         try:
             future.get(timeout=10)
         except Exception as e:
-            logger.error(f"Failed to send message to {topic}: {e}")
+            LOGGER.error(f"Failed to send message to {topic}: {e}")
 
     def __del__(self) -> None:
         """Cleanup method called when the object is destroyed

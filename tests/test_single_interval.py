@@ -52,7 +52,7 @@ class TestInit(unittest.TestCase):
 class TestExecuteCore(unittest.TestCase):
     def setUp(self):
         """Mocks the logger to deactivate logs in test run."""
-        patcher = patch("src.test_runner.test_types.extended.logger")
+        patcher = patch("src.test_runner.test_types.extended.LOGGER")
         self.mock_logger = patcher.start()
         self.addCleanup(patcher.stop)
 

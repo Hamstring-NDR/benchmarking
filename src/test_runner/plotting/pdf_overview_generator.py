@@ -28,7 +28,7 @@ from src.test_runner.plotting.plot_generator import (
     EnteringProcessedPerTimePlotGenerator,
 )
 
-logger = get_logger()
+LOGGER = get_logger()
 
 
 class PDFOverviewGenerator:
@@ -329,11 +329,11 @@ class PDFOverviewGenerator:
 
         try:
             self.document.save(absolute_output_filename, garbage=4, deflate=True)
-            logger.info(
+            LOGGER.info(
                 f"Successfully stored document under {relative_output_filename}"
             )
         except ValueError as err:  # includes zero page error
-            logger.error(err)
+            LOGGER.error(err)
 
 
 # Only for testing

@@ -6,8 +6,7 @@ import yaml
 
 from src import CONFIG_FILEPATH
 
-# Global formatting for all loggers
-log_colors = {
+LOG_COLORS = {
     "DEBUG": "cyan",
     "INFO": "green",
     "WARNING": "yellow",
@@ -19,14 +18,14 @@ log_colors = {
 simple_formatter = colorlog.ColoredFormatter(
     fmt="%(log_color)s[%(asctime)s, %(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    log_colors=log_colors,
+    log_colors=LOG_COLORS,
 )
 
 # Formatter for DEBUG, ERROR, and CRITICAL levels
 detailed_formatter = colorlog.ColoredFormatter(
     fmt="%(log_color)s%(asctime)s [%(levelname)s] %(message)s\n    ⤷ In %(module)s:%(lineno)d, %(funcName)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    log_colors=log_colors,
+    log_colors=LOG_COLORS,
 )
 
 

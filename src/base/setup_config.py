@@ -3,7 +3,7 @@ import yaml
 from src import CONFIG_FILEPATH
 from src.base.logging_config import get_logger
 
-logger = get_logger()
+LOGGER = get_logger()
 
 
 def setup_config():
@@ -17,14 +17,14 @@ def setup_config():
         FileNotFoundError: Configuration file could not be opened
     """
     try:
-        logger.debug(
+        LOGGER.debug(
             f"Opening benchmark test configuration file at {CONFIG_FILEPATH}..."
         )
         with open(CONFIG_FILEPATH, "r") as file:
             configuration = yaml.safe_load(file)
     except FileNotFoundError:
-        logger.critical(f"File {CONFIG_FILEPATH} does not exist. Aborting...")
+        LOGGER.critical(f"File {CONFIG_FILEPATH} does not exist. Aborting...")
         raise
 
-    logger.debug("Configuration file successfully opened and information returned.")
+    LOGGER.debug("Configuration file successfully opened and information returned.")
     return configuration

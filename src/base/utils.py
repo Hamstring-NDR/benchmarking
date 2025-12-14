@@ -5,10 +5,8 @@ import yaml
 
 from src import BASE_DIR, DIRECTORY_STRUCTURE_FILEPATH
 from src.base.logging_config import get_logger
-from src.base.setup_config import setup_config
 
-logger = get_logger()
-config = setup_config()
+LOGGER = get_logger()
 
 
 class ReadWriteUtils:
@@ -19,7 +17,7 @@ class ReadWriteUtils:
             with open(metadata_filepath, "w") as file:
                 yaml.dump(data, file, default_flow_style=False)
         except FileNotFoundError:
-            logger.critical(f"File {metadata_filepath} does not exist. Aborting...")
+            LOGGER.critical(f"File {metadata_filepath} does not exist. Aborting...")
             raise
 
     @staticmethod
@@ -32,7 +30,7 @@ class ReadWriteUtils:
             with open(metadata_filepath, "r") as file:
                 data = yaml.safe_load(file)
         except FileNotFoundError:
-            logger.critical(f"File {metadata_filepath} does not exist. Aborting...")
+            LOGGER.critical(f"File {metadata_filepath} does not exist. Aborting...")
             raise
 
         return data
@@ -43,7 +41,7 @@ class ReadWriteUtils:
             with open(DIRECTORY_STRUCTURE_FILEPATH, "r") as file:
                 data = yaml.safe_load(file)
         except FileNotFoundError:
-            logger.critical(
+            LOGGER.critical(
                 f"File {DIRECTORY_STRUCTURE_FILEPATH} does not exist. Aborting..."
             )
             raise
@@ -51,7 +49,7 @@ class ReadWriteUtils:
         try:
             result = data[for_plot]["files"]
         except KeyError:
-            logger.critical(
+            LOGGER.critical(
                 f"Invalid data directory structure configuration or given plot name does not exist"
             )
             raise
@@ -72,7 +70,7 @@ class ReadWriteUtils:
             with open(DIRECTORY_STRUCTURE_FILEPATH, "r") as file:
                 data = yaml.safe_load(file)
         except FileNotFoundError:
-            logger.critical(
+            LOGGER.critical(
                 f"File {DIRECTORY_STRUCTURE_FILEPATH} does not exist. Aborting..."
             )
             raise
@@ -80,7 +78,7 @@ class ReadWriteUtils:
         try:
             output_filename = data[for_plot]["output_filename"]
         except KeyError:
-            logger.critical(
+            LOGGER.critical(
                 f"Invalid data directory structure configuration or given plot name does not exist"
             )
             raise

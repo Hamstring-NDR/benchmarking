@@ -32,7 +32,7 @@ from src.test_runner.plotting.plot_generator import (
 )
 from src.test_runner.test_types import LATENCIES_COMPARISON_FILENAME, CLICKHOUSE_CONTAINER_NAME
 
-logger = get_logger()
+LOGGER = get_logger()
 
 
 class BaseTest:
@@ -74,7 +74,7 @@ class BaseTest:
 
     def execute(self):
         """Executes the test with the configured parameters."""
-        logger.info(f"{self.metadata['test_name']}: Start test")
+        LOGGER.info(f"{self.metadata['test_name']}: Start test")
 
         self.progress_bar, self.custom_fields = self._setup_progress_bar()
 
@@ -87,7 +87,7 @@ class BaseTest:
         self.progress_bar = None
         self.custom_fields = None
 
-        logger.info(f"{self.metadata['test_name']}: Finish test")
+        LOGGER.info(f"{self.metadata['test_name']}: Finish test")
 
     def execute_and_generate_report(self):
         """Handles the entire benchmark test procedure required for generating a report. Executes the test and
@@ -95,7 +95,7 @@ class BaseTest:
         self.__validate_filename(self.metadata["test_name"])
 
         self.__cleanup_clickhouse_database()
-        logger.info(
+        LOGGER.info(
             f"{self.metadata['test_name']} Preparation: Database cleanup finished"
         )
 
@@ -112,12 +112,12 @@ class BaseTest:
         )
 
         self.__extract_all_data_from_clickhouse(test_identifier)
-        logger.info(
+        LOGGER.info(
             f"{self.metadata['test_name']}: Database entries extracted under {test_identifier}"
         )
 
         self.__cleanup_clickhouse_database()
-        logger.info(
+        LOGGER.info(
             f"{self.metadata['test_name']} Cleanup: After-test database cleanup finished"
         )
 
@@ -307,7 +307,7 @@ class BaseTest:
         with open(sql_file) as file:
             sql_query = file.read()
 
-        logger.info(
+        LOGGER.info(
             "Wait until all data has been processed. This might take a while..."
         )
 
@@ -323,7 +323,7 @@ class BaseTest:
                 ]
             )
 
-            logger.debug(f"Check #{i}, currently: {int(number_of_entries)} entries")
+            LOGGER.debug(f"Check #{i}, currently: {int(number_of_entries)} entries")
 
             if int(number_of_entries) == 0:
                 return

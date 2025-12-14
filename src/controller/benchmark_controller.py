@@ -4,8 +4,8 @@ import subprocess
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
 
-logger = get_logger()
-benchmark_test_config = setup_config()
+LOGGER = get_logger()
+CONFIG = setup_config()
 
 
 class BenchmarkController:
@@ -21,7 +21,7 @@ class BenchmarkController:
     ):
         """Sends the command to the test runner container to start the respective test with the configured
         parameters."""
-        self.test_parameters = benchmark_test_config["tests"][test_name]
+        self.test_parameters = CONFIG["tests"][test_name]
 
         match test_name:  # acts as whitelist
             case "ramp_up":
@@ -57,7 +57,7 @@ class BenchmarkController:
 
     def run_configured_tests_sequentially(self):
         """Runs the tests from the configuration sequentially."""
-        for test_run in benchmark_test_config["test_runs"]:
+        for test_run in CONFIG["test_runs"]:
             self.run_single_test(test_run)
 
     def __handle_ramp_up_input(self) -> list[str]:

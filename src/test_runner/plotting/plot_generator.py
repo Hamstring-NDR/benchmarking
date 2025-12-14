@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt, ticker
 from src.base.logging_config import get_logger
 from src.base.utils import ReadWriteUtils
 
-logger = get_logger()
+LOGGER = get_logger()
 
 
 class PlotGenerator:
@@ -33,7 +33,7 @@ class PlotGenerator:
         output_filepath.parent.mkdir(parents=True, exist_ok=True)
 
         plt.savefig(output_filepath, dpi=300, bbox_inches="tight")
-        logger.info(f"File saved at {output_filepath}")
+        LOGGER.info(f"File saved at {output_filepath}")
 
     def _get_start_time(self) -> datetime.datetime:
         return self.metadata["start_timestamp"]
@@ -450,7 +450,7 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
                     "timestamp"  # processed_total.csv contains "timestamp" column
                 )
             else:
-                logger.warning(f"No valid timestamp column found in {file}")
+                LOGGER.warning(f"No valid timestamp column found in {file}")
                 continue
 
             df[timestamp_col] = pd.to_datetime(df[timestamp_col])

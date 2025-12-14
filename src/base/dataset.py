@@ -7,7 +7,7 @@ from torch.utils.data.dataset import Dataset
 
 from src.base.logging_config import get_logger
 
-logger = get_logger("train.dataset")
+LOGGER = get_logger("train.dataset")
 
 
 def preprocess(x: pl.DataFrame) -> pl.DataFrame:
@@ -23,7 +23,7 @@ def preprocess(x: pl.DataFrame) -> pl.DataFrame:
     Returns:
         pl.DataFrame: Preprocessed dataset with structured domain components.
     """
-    logger.debug("Start preprocessing data.")
+    LOGGER.debug("Start preprocessing data.")
     x = x.filter(pl.col("query").str.len_chars() > 0)
     x = x.unique(subset="query")
     x = x.with_columns(
@@ -38,7 +38,7 @@ def preprocess(x: pl.DataFrame) -> pl.DataFrame:
         ]
     )
 
-    logger.debug("Start preprocessing FQDN.")
+    LOGGER.debug("Start preprocessing FQDN.")
     x = x.with_columns(
         [
             # FQDN
@@ -48,7 +48,7 @@ def preprocess(x: pl.DataFrame) -> pl.DataFrame:
 
     x = x.filter(pl.col("labels").list.len().ne(1))
 
-    logger.debug("Start preprocessing Second-level domain.")
+    LOGGER.debug("Start preprocessing Second-level domain.")
     x = x.with_columns(
         [
             # Second-level domain
@@ -61,7 +61,7 @@ def preprocess(x: pl.DataFrame) -> pl.DataFrame:
         ]
     )
 
-    logger.debug("Start preprocessing Third-level domain.")
+    LOGGER.debug("Start preprocessing Third-level domain.")
     x = x.with_columns(
         [
             # Third-level domain
@@ -93,7 +93,7 @@ def cast_dga(data_path: str, max_rows: int) -> pl.DataFrame:
     Returns:
         pl.DataFrame: Processed DGA dataset with structured domain information.
     """
-    logger.info(f"Start casting data set {data_path}.")
+    LOGGER.info(f"Start casting data set {data_path}.")
     df = pl.read_csv(data_path)
     df = df.rename({"Domain": "query"})
     df = df.drop(["DGA_family", "Type"])
@@ -103,7 +103,7 @@ def cast_dga(data_path: str, max_rows: int) -> pl.DataFrame:
     # df_legit = df.filter(pl.col("class").eq(0))[:max_rows]
     # df_malicious = df.filter(pl.col("class").eq(1))[:max_rows]
 
-    logger.info(f"Data loaded with shape {df.shape}")
+    LOGGER.info(f"Data loaded with shape {df.shape}")
     return df  # pl.concat([df_legit, df_malicious])
 
 
@@ -120,7 +120,7 @@ def cast_bambenek(data_path: str, max_rows: int) -> pl.DataFrame:
     Returns:
         pl.DataFrame: Processed Bambenek dataset with structured domain information.
     """
-    logger.info(f"Start casting data set {data_path}.")
+    LOGGER.info(f"Start casting data set {data_path}.")
     df = pl.read_csv(data_path)
     df = df.rename({"Domain": "query"})
     df = df.drop(["DGA_family", "Type"])
@@ -130,7 +130,7 @@ def cast_bambenek(data_path: str, max_rows: int) -> pl.DataFrame:
     # df_legit = df.filter(pl.col("class").eq(0))[:max_rows]
     # df_malicious = df.filter(pl.col("class").eq(1))[:max_rows]
 
-    logger.info(f"Data loaded with shape {df.shape}")
+    LOGGER.info(f"Data loaded with shape {df.shape}")
     return df  # pl.concat([df_legit, df_malicious])
 
 
@@ -149,7 +149,7 @@ def cast_cic(data_path: List[str], max_rows: int) -> pl.DataFrame:
     """
     dataframes = []
     for data in data_path:
-        logger.info(f"Start casting data set {data}.")
+        LOGGER.info(f"Start casting data set {data}.")
         y = data.split("_")[-1].split(".")[0]
         df = pl.read_csv(
             data, has_header=False, n_rows=max_rows if max_rows > 0 else None
@@ -161,7 +161,7 @@ def cast_cic(data_path: List[str], max_rows: int) -> pl.DataFrame:
         df = df.rename({"column_1": "query"})
         df = preprocess(df)
 
-        logger.info(f"Data loaded with shape {df.shape}")
+        LOGGER.info(f"Data loaded with shape {df.shape}")
         dataframes.append(df)
 
     return pl.concat(dataframes)
@@ -181,7 +181,7 @@ def cast_dgarchive(data_path: str, max_rows: int) -> pl.DataFrame:
         pl.DataFrame: Processed DGArchive dataset with structured domain information.
     """
     dataframes = []
-    logger.info(f"Start casting data set {data_path}.")
+    LOGGER.info(f"Start casting data set {data_path}.")
     df = pl.read_csv(
         data_path,
         has_header=False,
@@ -194,7 +194,7 @@ def cast_dgarchive(data_path: str, max_rows: int) -> pl.DataFrame:
         [pl.lit(data_path.split("/")[-1].split("_")[0]).alias("class")]
     )
     df = preprocess(df)
-    logger.info(f"Data loaded with shape {df.shape}")
+    LOGGER.info(f"Data loaded with shape {df.shape}")
     dataframes.append(df)
     return pl.concat(dataframes)
 
@@ -224,7 +224,7 @@ def cast_dgta(data_path: str, max_rows: int) -> pl.DataFrame:
         """
         return str(data.decode("latin-1").encode("utf-8").decode("utf-8"))
 
-    logger.info(f"Start casting data set {data_path}.")
+    LOGGER.info(f"Start casting data set {data_path}.")
 
     df = pl.read_parquet(data_path)
     df = df.rename({"domain": "query"})
@@ -235,11 +235,9 @@ def cast_dgta(data_path: str, max_rows: int) -> pl.DataFrame:
         pl.col("query").map_elements(__custom_decode, return_dtype=pl.Utf8)
     )
     df = preprocess(df)
-    # df_legit = df.filter(pl.col("class").eq(0))[:max_rows]
-    # df_malicious = df.filter(pl.col("class").eq(1))[:max_rows]
 
-    logger.info(f"Data loaded with shape {df.shape}")
-    return df  # pl.concat([df_legit, df_malicious])
+    LOGGER.info(f"Data loaded with shape {df.shape}")
+    return df
 
 
 def cast_heicloud(data_path: str, max_rows: int) -> pl.DataFrame:
@@ -256,7 +254,7 @@ def cast_heicloud(data_path: str, max_rows: int) -> pl.DataFrame:
         pl.DataFrame: Processed heiCLOUD dataset with legitimate domain labels.
     """
     dataframes = []
-    logger.info(f"Start casting data set {data_path}.")
+    LOGGER.info(f"Start casting data set {data_path}.")
     df = pl.read_csv(
         data_path,
         separator=" ",
@@ -283,7 +281,7 @@ def cast_heicloud(data_path: str, max_rows: int) -> pl.DataFrame:
     df = df.select("query")
     df = df.with_columns([pl.lit("legit").alias("class")])
     df = preprocess(df)
-    logger.info(f"Data loaded with shape {df.shape}")
+    LOGGER.info(f"Data loaded with shape {df.shape}")
     dataframes.append(df)
     return pl.concat(dataframes)
 
@@ -302,10 +300,10 @@ class DatasetLoader:
             base_path (str): Base directory path containing all dataset folders.
             max_rows (int): Maximum rows to load per dataset (default: -1 for unlimited).
         """
-        logger.info("Initialise DatasetLoader")
+        LOGGER.info("Initialise DatasetLoader")
         self.base_path = base_path
         self.max_rows = max_rows
-        logger.info("Finished initialisation.")
+        LOGGER.info("Finished initialisation.")
 
     @property
     def dgta_dataset(self) -> Dataset:
@@ -414,17 +412,15 @@ class Dataset:
         """
         self.name = name
         self.data_path = data_path
-        if cast_dataset != None and data_path != "":
-            logger.info("Cast function provided, load data set.")
+            LOGGER.info("Cast function provided, load data set.")
             self.data: pl.DataFrame = cast_dataset(data_path, max_rows)
         elif data_path != "":
-            logger.info("Data path provided, load data set.")
+            LOGGER.info("Data path provided, load data set.")
             self.data: pl.DataFrame = pl.read_csv(data_path)
-        elif not data is None:
-            logger.info("Data set provided, load data set.")
+            LOGGER.info("Data set provided, load data set.")
             self.data: pl.DataFrame = data
         else:
-            logger.error("No data given!")
+            LOGGER.error("No data given!")
             raise NotImplementedError("No data given")
 
     def __len__(self) -> int:

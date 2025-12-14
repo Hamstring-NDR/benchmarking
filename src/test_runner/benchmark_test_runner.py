@@ -9,10 +9,10 @@ from src.test_runner.test_types.main import (
     LongTermTest,
 )
 
-logger = get_logger()
-benchmark_test_config = setup_config()
+LOGGER = get_logger()
+CONFIG = setup_config()
 
-test_config = benchmark_test_config["tests"]
+CONFIG_TESTS = CONFIG["tests"]
 
 
 class BenchmarkTestRunner:
@@ -78,35 +78,35 @@ class BenchmarkTestRunner:
             "--normal_data_rate",
             type=float,
             help=f"Normal Rate Test: data rate in msg/s [float | int], "
-            f"default: {test_config['burst']['normal_rate']['data_rate']}",
-            default=test_config["burst"]["normal_rate"]["data_rate"],
+                 f"default: {CONFIG_TESTS['burst']['normal_rate']['data_rate']}",
+            default=CONFIG_TESTS["burst"]["normal_rate"]["data_rate"],
         )
         parser.add_argument(
             "--normal_interval_length",
             type=float,
             help=f"Normal Rate Test: interval length in seconds [float | int], "
-            f"default: {test_config['burst']['normal_rate']['interval_length']}",
-            default=test_config["burst"]["normal_rate"]["interval_length"],
+                 f"default: {CONFIG_TESTS['burst']['normal_rate']['interval_length']}",
+            default=CONFIG_TESTS["burst"]["normal_rate"]["interval_length"],
         )
         parser.add_argument(
             "--burst_data_rate",
             type=float,
             help=f"Burst Rate Test: data rate in msg/s [float | int], "
-            f"default: {test_config['burst']['burst_rate']['data_rate']}",
-            default=test_config["burst"]["burst_rate"]["data_rate"],
+                 f"default: {CONFIG_TESTS['burst']['burst_rate']['data_rate']}",
+            default=CONFIG_TESTS["burst"]["burst_rate"]["data_rate"],
         )
         parser.add_argument(
             "--burst_interval_length",
             type=float,
             help=f"Burst Rate Test: interval length in seconds [float | int], "
-            f"default: {test_config['burst']['burst_rate']['interval_length']}",
-            default=test_config["burst"]["burst_rate"]["interval_length"],
+                 f"default: {CONFIG_TESTS['burst']['burst_rate']['interval_length']}",
+            default=CONFIG_TESTS["burst"]["burst_rate"]["interval_length"],
         )
         parser.add_argument(
             "--number_of_repetitions",
             type=int,
-            help=f"number of intervals [int], default: {test_config['burst']['number_of_repetitions']}",
-            default=test_config["burst"]["number_of_repetitions"],
+            help=f"number of intervals [int], default: {CONFIG_TESTS['burst']['number_of_repetitions']}",
+            default=CONFIG_TESTS["burst"]["number_of_repetitions"],
         )
         parser.set_defaults(func=self._execute_burst_with_report)
 
@@ -117,14 +117,14 @@ class BenchmarkTestRunner:
         parser.add_argument(
             "--data_rate",
             type=float,
-            help=f"Data rate in msg/s [float | int], default: {test_config['long_term']['data_rate']}",
-            default=test_config["long_term"]["data_rate"],
+            help=f"Data rate in msg/s [float | int], default: {CONFIG_TESTS['long_term']['data_rate']}",
+            default=CONFIG_TESTS["long_term"]["data_rate"],
         )
         parser.add_argument(
             "--length",
             type=float,
-            help=f"Full length/duration in minutes [float | int], default: {test_config['long_term']['length']}",
-            default=test_config["long_term"]["length"],
+            help=f"Full length/duration in minutes [float | int], default: {CONFIG_TESTS['long_term']['length']}",
+            default=CONFIG_TESTS["long_term"]["length"],
         )
         parser.set_defaults(func=self._execute_long_term_with_report)
 
@@ -135,8 +135,8 @@ class BenchmarkTestRunner:
         parser.add_argument(
             "--length",
             type=float,
-            help=f"Full length/duration in minutes [float | int], default: {test_config['maximum_throughput']['length'] / 60}",
-            default=test_config["maximum_throughput"]["length"] / 60,
+            help=f"Full length/duration in minutes [float | int], default: {CONFIG_TESTS['maximum_throughput']['length'] / 60}",
+            default=CONFIG_TESTS["maximum_throughput"]["length"] / 60,
         )
         parser.set_defaults(func=self._execute_maximum_throughput_with_report)
 
@@ -145,7 +145,7 @@ class BenchmarkTestRunner:
         default_data_rates = []
         default_durations = []
 
-        for e in test_config["ramp_up"]["intervals"]:
+        for e in CONFIG_TESTS["ramp_up"]["intervals"]:
             default_data_rates.append(e[0])
             default_durations.append(e[1])
 

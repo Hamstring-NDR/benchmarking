@@ -3,15 +3,13 @@ from abc import abstractmethod
 from datetime import datetime, timedelta
 
 from src.base.logging_config import get_logger
-from src.base.utils import setup_config
 from src.test_runner.plotting.metadata_configuration import (
     MetadataConfiguration,
 )
 from src.test_runner.test_types import PRODUCE_TO_TOPIC
 from src.test_runner.test_types.base import BaseTest
 
-logger = get_logger()
-config = setup_config()
+LOGGER = get_logger()
 
 
 class IntervalBasedTest(BaseTest):
@@ -106,11 +104,11 @@ class IntervalBasedTest(BaseTest):
 
                 current_index += 1
             except Exception as err:
-                logger.error(f"{err=}")
+                LOGGER.error(f"{err=}")
 
             time.sleep(1.0 / messages_per_second)
 
-        logger.debug(f"Finish interval with {messages_per_second} msg/s")
+        LOGGER.debug(f"Finish interval with {messages_per_second} msg/s")
         return current_index
 
     def __get_total_duration(self) -> timedelta:
@@ -236,7 +234,7 @@ class SingleIntervalTest(BaseTest):
 
                 current_index += 1
             except Exception as err:
-                logger.error(f"{err=}")
+                LOGGER.error(f"{err=}")
 
             time.sleep(1.0 / messages_per_second)
 
