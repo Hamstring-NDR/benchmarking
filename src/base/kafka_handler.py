@@ -37,7 +37,6 @@ class SimpleKafkaProduceHandler:
             "enable_idempotence": False,
             "acks": 1,
         }
-        LOGGER.info(f"Initializing KafkaProducer with brokers: {self.brokers}")
         self.producer = kafka.KafkaProducer(**conf)
 
     def produce(self, topic: str, data: str, key: None | str = None) -> None:

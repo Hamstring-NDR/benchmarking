@@ -95,7 +95,7 @@ class RangeNumberPerTimeMetadataInformation(SingleMetadataInformation):
             values: List of values per time, e.g. [27.4, 31.2] for 27.4/s - 31.2/s.
             per: Per time, must be "s", "min" or "h".
         """
-        if values is not list:
+        if not isinstance(values, list):
             values = [values]
 
         min_value = min(values)

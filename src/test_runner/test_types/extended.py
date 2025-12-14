@@ -152,7 +152,7 @@ class IntervalBasedTest(BaseTest):
         Returns:
             List of interval lengths. If single value was given, all entries are the same.
         """
-        if type(intervals) is not list:
+        if not isinstance(intervals, list):
             intervals = [
                 intervals for _ in range(len(messages_per_second_in_intervals))
             ]

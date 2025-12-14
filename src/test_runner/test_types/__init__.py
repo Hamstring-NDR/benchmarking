@@ -1,8 +1,8 @@
-from src.base.utils import setup_config
+from src.base.setup_config import setup_config
 
-config = setup_config()
+CONFIG = setup_config()
 
-PRODUCE_TO_TOPIC: str = config["environment"]["kafka_topics"]["pipeline"]["logserver_in"]
+PRODUCE_TO_TOPIC: str = CONFIG["environment"]["kafka_topics"]["pipeline"]["logserver_in"]
 LATENCIES_COMPARISON_FILENAME: str = "latency_comparison.png"
 MODULE_TO_CSV_FILENAME: dict[str, str] = {
     "Batch Handler": "batch_handler.csv",
@@ -12,6 +12,6 @@ MODULE_TO_CSV_FILENAME: dict[str, str] = {
     "Log Server": "logserver.csv",
     "Prefilter": "prefilter.csv",
 }
-CLICKHOUSE_CONTAINER_NAME: str = config["environment"]["monitoring"][
+CLICKHOUSE_CONTAINER_NAME: str = CONFIG["environment"]["monitoring"][
     "clickhouse_server"
 ]["hostname"]
