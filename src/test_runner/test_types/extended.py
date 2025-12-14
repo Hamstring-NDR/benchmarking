@@ -109,8 +109,8 @@ class IntervalBasedTest(BaseTest):
                 )
 
                 current_index += 1
-            except KafkaException:
-                logger.error(KafkaException)
+            except Exception as err:
+                logger.error(f"{err=}")
 
             time.sleep(1.0 / messages_per_second)
 
