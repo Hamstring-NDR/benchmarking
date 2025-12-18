@@ -507,11 +507,23 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
         self,
         test_identifier: str,
         intervals_in_sec: Optional[list[int]] = None,
+            min_minutes_for_minute_buckets: float = 5,
+            min_hours_for_hour_buckets: float = 2,
     ):
+        """Initialize the plot generator with adaptive time bucket support.
+        
+        Args:
+            test_identifier: Test identifier for the plot
+            intervals_in_sec: Optional list of intervals in seconds
+            min_minutes_for_minute_buckets: Minimum duration in minutes to use minute buckets (default: 5)
+            min_hours_for_hour_buckets: Minimum duration in hours to use hour buckets (default: 2)
+        """
         plot_name = "entering_processed_per_time"
         super().__init__(plot_name=plot_name, test_identifier=test_identifier)
 
         self.intervals_in_sec = intervals_in_sec
+        self.min_minutes_for_minute_buckets = min_minutes_for_minute_buckets
+        self.min_hours_for_hour_buckets = min_hours_for_hour_buckets
 
         self.default_fig_size = (8.35, 4.8)
 
@@ -519,15 +531,16 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
         self,
         fig_size: tuple[float, float] = None,
         bar_width: float = 0.7,
-        x_major_locator: int = 1,
+            x_major_locator: Optional[int] = None,
         y_major_locator: int = 2500,
     ):
-        """Creates a bar chart showing entering and processed log lines per minute.
+        """Creates a bar chart showing entering and processed log lines per time bucket.
+        Time bucket size is determined adaptively based on data duration.
         Processed data is displayed as negative bars for mirror effect.
 
         Args:
             bar_width (float): Width of the bars, 0.7 by default
-            x_major_locator (int): Major tick interval for x-axis, 1 by default
+            x_major_locator (Optional[int]): Major tick interval for x-axis, auto-determined if None
             y_major_locator (int): Major tick interval for y-axis, 2500 by default
         """
         self._set_up_initial_figure(fig_size)
@@ -537,60 +550,81 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
             self.plot_name, self.test_identifier
         )
 
-        for name, file in modules_to_csv_paths.items():
-            df = pd.read_csv(file)
+        # 1. Determine duration and bucket unit
+        duration_check_file = modules_to_csv_paths.get("Entering Second")
+        if not duration_check_file:
+            # Fallback to any file if specific key not present
+            duration_check_file = next(iter(modules_to_csv_paths.values()))
 
+        df_check = pd.read_csv(duration_check_file)
+        if df_check.empty:
+            LOGGER.warning("Data file for duration check is empty.")
+            return
+
+        time_col_check = self._get_time_column_name(df_check, str(duration_check_file))
+        df_check[time_col_check] = pd.to_datetime(df_check[time_col_check])
+        duration_seconds = (df_check[time_col_check].max() - df_check[time_col_check].min()).total_seconds()
+
+        bucket_unit = self._determine_bucket_unit(duration_seconds)
+        LOGGER.debug(f"Determined bucket unit: {bucket_unit} for duration {duration_seconds}s")
+
+        # 2. Select files based on bucket unit
+        if bucket_unit == "second":
+            entering_key = "Entering Second"
+            processed_key = "Processed Second"
+        elif bucket_unit == "minute":
+            entering_key = "Entering Minute"
+            processed_key = "Processed Minute"
+        else:  # hour
+            entering_key = "Entering Hour"
+            processed_key = "Processed Hour"
+
+        files_to_plot = {
+            entering_key: modules_to_csv_paths.get(entering_key),
+            processed_key: modules_to_csv_paths.get(processed_key)
+        }
+
+        # 3. Plot
+        for name, file in files_to_plot.items():
+            if not file:
+                LOGGER.warning(f"File for {name} not found in configuration.")
+                continue
+
+            df = pd.read_csv(file)
             if df.empty:
                 continue  # skip empty datafiles
 
-            time_col = self._get_time_column_name(df, file)
-
+            time_col = self._get_time_column_name(df, str(file))
             df[time_col] = pd.to_datetime(df[time_col])
             df = df.sort_values(by=time_col)
 
-            df["minutes_since_start"] = (
-                df[time_col] - start_time.replace(tzinfo=None)
-            ).dt.total_seconds() / 60
+            # Calculate time since start in the appropriate unit
+            df["time_since_start"] = self._calculate_time_since_start(
+                df[time_col], start_time, bucket_unit
+            )
 
-            count_col, is_cumulative = self._get_count_column_name(df, file)
+            # Filter out negative time values (before start)
+            df = df[df["time_since_start"] >= 0]
 
-            # if data is cumulative, we need to convert to per-minute counts
-            if is_cumulative:
-                # group by minute buckets if not already aggregated
-                if time_col != "time_bucket":
-                    df["time_bucket"] = df[time_col].dt.floor("min")
-                    grouped = df.groupby("time_bucket")[count_col].last().reset_index()
-                    grouped["minutes_since_start"] = (
-                        grouped["time_bucket"] - start_time.replace(tzinfo=None)
-                    ).dt.total_seconds() / 60
-                else:
-                    grouped = df.copy()
-                    grouped["time_bucket"] = grouped[time_col]
+            count_col = self._get_count_column_name(df, str(file))
 
-                # calculate per-minute count from cumulative values
-                grouped["count"] = grouped[count_col].diff()
-                grouped.loc[grouped.index[0], "count"] = grouped[count_col].iloc[0]
+            time_data = df["time_since_start"]
+            count_data = df[count_col]
 
-                # filter out negative time values
-                grouped = grouped[grouped["minutes_since_start"] >= 0]
-
-                count_data = grouped["count"]
-                time_data = grouped["minutes_since_start"]
-            else:
-                # filter out negative time values
-                df = df[df["minutes_since_start"] >= 0]
-                count_data = df[count_col]
-                time_data = df["minutes_since_start"]
-
+            label_name = "Entering" if "Entering" in name else "Processed"
             if "Entering" in name:
-                self.__plot_core(name, time_data, count_data, bar_width)
-            else:  # "Processed" (shown as negative)
-                self.__plot_core(name, time_data, -count_data, bar_width)
+                self.__plot_core(label_name, time_data, count_data, bar_width)
+            else:
+                self.__plot_core(label_name, time_data, -count_data, bar_width)
 
+        # Set x_major_locator based on bucket unit if not explicitly provided
+        if x_major_locator is None:
+            x_major_locator = self._get_default_x_major_locator(bucket_unit)
+        
         plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(x_major_locator))
         plt.gca().yaxis.set_major_locator(ticker.MultipleLocator(y_major_locator))
 
-        self._set_labels()
+        self._set_labels(bucket_unit)
 
         plt.legend()
         self._activate_grid()
@@ -613,20 +647,126 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
         )
 
     @staticmethod
-    def _get_x_label():
-        return "Minutes since start"
+    def _get_x_label(bucket_unit: str) -> str:
+        """Get x-axis label based on bucket unit."""
+        match bucket_unit:
+            case "second":
+                return "Seconds since start"
+            case "minute":
+                return "Minutes since start"
+            case "hour":
+                return "Hours since start"
+            case _:
+                return "Time since start"
 
     @staticmethod
-    def _get_y_label():
-        return "Log lines per minute"
+    def _get_y_label(bucket_unit: str) -> str:
+        """Get y-axis label based on bucket unit."""
+        match bucket_unit:
+            case "second":
+                return "Log lines per second"
+            case "minute":
+                return "Log lines per minute"
+            case "hour":
+                return "Log lines per hour"
+            case _:
+                return "Log lines per time unit"
 
-    def _set_labels(self):
-        plt.xlabel(self._get_x_label(), labelpad=10)
-        plt.ylabel(self._get_y_label())
+    def _set_labels(self, bucket_unit: str):
+        plt.xlabel(self._get_x_label(bucket_unit), labelpad=10)
+        plt.ylabel(self._get_y_label(bucket_unit))
 
     @staticmethod
     def _activate_grid():
         plt.grid(axis="y", linestyle="--")
+
+    def _determine_bucket_unit(self, duration_seconds: float) -> str:
+        """Determine the appropriate bucket unit based on data duration using match statement.
+        
+        Args:
+            duration_seconds: Total duration of the data in seconds
+            
+        Returns:
+            Bucket unit: "second", "minute", or "hour"
+        """
+        duration_minutes = duration_seconds / 60
+        duration_hours = duration_minutes / 60
+
+        match True:
+            case _ if duration_hours >= self.min_hours_for_hour_buckets:
+                return "hour"
+            case _ if duration_minutes >= self.min_minutes_for_minute_buckets:
+                return "minute"
+            case _:
+                return "second"
+
+    @staticmethod
+    def _calculate_time_since_start(
+            timestamps: pd.Series, start_time: datetime.datetime, bucket_unit: str
+    ) -> pd.Series:
+        """Calculate time since start in the appropriate unit.
+        
+        Args:
+            timestamps: Series of timestamps
+            start_time: Start time of the test
+            bucket_unit: Unit for the bucket ("second", "minute", or "hour")
+            
+        Returns:
+            Series with time values in the appropriate unit
+        """
+        time_diff_seconds = (
+                timestamps - start_time.replace(tzinfo=None)
+        ).dt.total_seconds()
+
+        match bucket_unit:
+            case "second":
+                return time_diff_seconds
+            case "minute":
+                return time_diff_seconds / 60
+            case "hour":
+                return time_diff_seconds / 3600
+            case _:
+                return time_diff_seconds
+
+    @staticmethod
+    def _get_floor_frequency(bucket_unit: str) -> str:
+        """Get the pandas frequency string for floor operation.
+        
+        Args:
+            bucket_unit: Unit for the bucket ("second", "minute", or "hour")
+            
+        Returns:
+            Pandas frequency string
+        """
+        match bucket_unit:
+            case "second":
+                return "s"
+            case "minute":
+                return "min"
+            case "hour":
+                return "h"
+            case _:
+                return "min"
+
+    @staticmethod
+    def _get_default_x_major_locator(bucket_unit: str) -> int:
+        """Get default x-axis major locator based on bucket unit.
+        
+        Args:
+            bucket_unit: Unit for the bucket ("second", "minute", or "hour")
+            
+        Returns:
+            Default interval for x-axis ticks
+        """
+        match bucket_unit:
+            case "second":
+                return 10  # Every 10 seconds
+            case "minute":
+                return 1  # Every minute
+            case "hour":
+                return 1  # Every hour
+            case _:
+                return 1
 
     @staticmethod
     def _get_time_column_name(df: pd.DataFrame, filename: str) -> str:
@@ -640,15 +780,15 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
             raise ValueError(f"No recognized time column in {filename}")
 
     @staticmethod
-    def _get_count_column_name(df: pd.DataFrame, filename: str) -> [str, bool]:
+    def _get_count_column_name(df: pd.DataFrame, filename: str) -> str:
         if "count" in df.columns:
-            return "count", False  # count_col, is_cumulative
+            return "count"
+        elif "count()" in df.columns:
+            return "count()"
         elif "total_count" in df.columns:
-            return "total_count", False
-        elif "cumulative_count" in df.columns:
-            return "cumulative_count", True
+            return "total_count"
         else:
-            raise ValueError(f"No recognized count column in {filename}")
+            raise ValueError(f"No recognized count column in {filename}, found columns: {df.columns}")
 
 
 class LatenciesBoxplotGenerator(PlotGenerator):
