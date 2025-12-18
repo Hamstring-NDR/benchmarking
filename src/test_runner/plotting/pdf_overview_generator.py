@@ -338,28 +338,32 @@ class PDFOverviewGenerator:
 
 # Only for testing
 if __name__ == "__main__":
+    test_identifier = "20251214_134551_ramp_up"
+    intervals_in_seconds = [30, 30]
+    data_rates_per_interval = [1, 10]
+
     LatencyComparisonPlotGenerator(
-        test_identifier="20251117_200230_ramp_up",
-        intervals_in_sec=[30, 30, 30, 30, 30, 30],
-        data_rates_per_interval=[1, 10, 50, 100, 150, 200],
+        test_identifier=test_identifier,
+        intervals_in_sec=intervals_in_seconds,
+        data_rates_per_interval=data_rates_per_interval,
     ).plot()
 
     LatenciesBoxplotGenerator(
-        test_identifier="20251117_200230_ramp_up",
+        test_identifier=test_identifier,
     ).plot()
 
     FillLevelsComparisonPlotGenerator(
-        test_identifier="20251117_200230_ramp_up",
-        intervals_in_sec=[30, 30, 30, 30, 30, 30],
+        test_identifier=test_identifier,
+        intervals_in_sec=intervals_in_seconds,
     ).plot()
 
     EnteringProcessedTotalPlotGenerator(
-        test_identifier="20251117_200230_ramp_up",
-        intervals_in_sec=[30, 30, 30, 30, 30, 30],
+        test_identifier=test_identifier,
+        intervals_in_sec=intervals_in_seconds,
     ).plot()
 
     EnteringProcessedPerTimePlotGenerator(
-        test_identifier="20251117_200230_ramp_up",
+        test_identifier=test_identifier,
     ).plot()
 
     generator = PDFOverviewGenerator(
@@ -367,8 +371,8 @@ if __name__ == "__main__":
     )
 
     generator.setup_first_page_layout(
-        test_identifier="20251117_200230_ramp_up",
+        test_identifier=test_identifier,
         benchmark_test_date=datetime.date(2025, 11, 17),
     )
 
-    generator.save_file(Path("src/testing_reports"), "report")
+    generator.save_file(Path("testing_reports"), "report")
