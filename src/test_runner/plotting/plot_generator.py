@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt, ticker
 
 from src.base.logging_config import get_logger
 from src.base.utils import ReadWriteUtils
+from src.test_runner.plotting.colors import Colors
 
 LOGGER = get_logger()
 
@@ -74,10 +75,6 @@ class PlotGenerator:
         for (unit, factor), threshold in zip(units, thresholds):
             if max_value_in_microseconds < threshold:
                 return unit, factor
-
-    @staticmethod
-    def _get_colors():
-        return plt.rcParams["axes.prop_cycle"].by_key()["color"]
 
 
 class GraphPlotGenerator(PlotGenerator):
@@ -146,9 +143,6 @@ class LatencyComparisonPlotGenerator(GraphPlotGenerator):
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
 
-        colors = self._get_colors()  # initialize color palette for graphs
-        cur_color_index = color_start_index
-
         total_max_time = 0  # seconds
         total_max_value = 0
 
@@ -190,8 +184,7 @@ class LatencyComparisonPlotGenerator(GraphPlotGenerator):
         y_unit, y_scale = self._determine_time_unit(total_max_value, y_input_unit)
 
         for name, df in dataframes.items():
-            self.__plot_core(name, df, x_scale, y_scale, colors[cur_color_index])
-            cur_color_index += 1
+            self.__plot_core(name, df, x_scale, y_scale, Colors().get_color(name))
 
         self._add_interval_lines(self.intervals_in_sec)
         self._add_interval_markings()
@@ -306,9 +299,6 @@ class FillLevelsComparisonPlotGenerator(GraphPlotGenerator):
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
 
-        colors = self._get_colors()  # initialize color palette for graphs
-        cur_color_index = color_start_index
-
         total_max_time = 0  # seconds
         total_max_value = 0
 
@@ -351,8 +341,7 @@ class FillLevelsComparisonPlotGenerator(GraphPlotGenerator):
         x_unit, x_scale = self._determine_time_unit(total_max_time, "seconds")
 
         for name, df in dataframes.items():
-            self.__plot_core(name, df, x_scale, colors[cur_color_index])
-            cur_color_index += 1
+            self.__plot_core(name, df, x_scale, Colors().get_color(name))
 
         self._add_interval_lines(self.intervals_in_sec)
 
@@ -428,9 +417,6 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
 
-        colors = self._get_colors()  # initialize color palette for graphs
-        cur_color_index = color_start_index
-
         modules_to_csv_paths = ReadWriteUtils.get_modules_to_csv_filepaths(
             self.plot_name, self.test_identifier
         )
@@ -459,8 +445,7 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
                 df[timestamp_col] - start_time.replace(tzinfo=None)
             ).dt.total_seconds()
 
-            self.__plot_core(name, df, downsample_factor, colors[cur_color_index])
-            cur_color_index += 1
+            self.__plot_core(name, df, downsample_factor, Colors().get_color(name))
 
         self._add_interval_lines(self.intervals_in_sec)
 
