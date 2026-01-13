@@ -7,14 +7,13 @@ LOGGER = get_logger()
 
 
 def setup_config():
-    """
-    Loads the configuration data from the configuration file and returns it as the corresponding Python object.
-
+    """Loads configuration data from the configuration file.
+    
     Returns:
-         Configuration data as corresponding Python object
+        dict: Configuration data as corresponding Python object.
 
     Raises:
-        FileNotFoundError: Configuration file could not be opened
+        FileNotFoundError: If the configuration file could not be opened.
     """
     try:
         LOGGER.debug(

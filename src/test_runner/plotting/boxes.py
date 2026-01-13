@@ -22,6 +22,16 @@ class BaseBox(pymupdf.Rect):
         top_padding: float = 0,
         left_padding: float = 0,
     ):
+        """Initializes values for the box.
+
+        Args:
+            page (pymupdf.Page): The page to draw on.
+            page_margin (dict[str, float]): The margins of the page.
+            width (float): The width of the box.
+            height (float): The height of the box.
+            top_padding (float): The top padding of the box. Default: 0.
+            left_padding (float): The left padding of the box. Default: 0.
+        """
         self.page = page
 
         x0 = page_margin.get("left") + left_padding
@@ -33,16 +43,25 @@ class BaseBox(pymupdf.Rect):
 
     @abstractmethod
     def fill(self, *args) -> pymupdf.Rect:
-        """Fills the box with content."""
-        raise NotImplementedError
-
-    def _get_padded(self, horizontal_padding: int = 8, vertical_padding: int = 3):
-        """
-        Returns the same rectangle but with inner padding.
+        """Fills the box with content.
 
         Args:
-            horizontal_padding (int): Padding in horizontal direction; default: 8
-            vertical_padding (int): Padding in vertical direction; default: 3
+            *args: Variable length argument list.
+
+        Returns:
+            pymupdf.Rect: The filled box.
+        """
+        raise NotImplementedError
+
+    def _get_padded(self, horizontal_padding: int = 8, vertical_padding: int = 3) -> pymupdf.Rect:
+        """Returns the same rectangle but with inner padding.
+
+        Args:
+            horizontal_padding (int): Padding in horizontal direction; default: 8.
+            vertical_padding (int): Padding in vertical direction; default: 3.
+
+        Returns:
+            pymupdf.Rect: The padded rectangle.
         """
         return pymupdf.Rect(
             self.x0 + horizontal_padding,
@@ -61,6 +80,16 @@ class MainTitleBox(BaseBox):
         test_date: datetime.date,
         generation_date: datetime.date = datetime.date.today(),
     ):
+        """Fills the box with the main title.
+
+        Args:
+            test_name (str): Name of the test.
+            test_date (datetime.date): Date of the test.
+            generation_date (datetime.date): Date of report generation. Default: today.
+
+        Returns:
+            self
+        """
         self.page.draw_rect(self, fill=(0,), fill_opacity=0.1, width=0.5)  # border
         self.page.insert_htmlbox(  # title
             self._get_padded(),
@@ -94,6 +123,14 @@ class SectionTitleBox(BaseBox):
     """Contains the section title."""
 
     def fill(self, text: str):
+        """Fills the box with the section title.
+
+        Args:
+            text (str): Title text.
+
+        Returns:
+            self
+        """
         self.page.draw_rect(self, fill=(0,), fill_opacity=0.3, width=0.5)  # border
         self.page.insert_htmlbox(  # title
             self._get_padded(vertical_padding=4),
@@ -108,6 +145,15 @@ class SectionDoubleTitleBox(BaseBox):
     """Contains the section titles for double-column sections."""
 
     def fill(self, text_1: str, text_2: str):
+        """Fills the box with two section titles.
+
+        Args:
+            text_1 (str): First title text.
+            text_2 (str): Second title text.
+
+        Returns:
+            self
+        """
         self.page.draw_rect(self, fill=(0,), fill_opacity=0.3, width=0.5)  # border
 
         width = self.x1 - self.x0
@@ -141,6 +187,14 @@ class SectionSubtitleBox(BaseBox):
     """Contains the section subtitle."""
 
     def fill(self, text: str):
+        """Fills the box with the section subtitle.
+
+        Args:
+            text (str): Subtitle text.
+
+        Returns:
+            self
+        """
         self.page.draw_rect(self, fill=(0,), fill_opacity=0.1, width=0.5)  # border
         self.page.insert_htmlbox(  # subtitle
             self._get_padded(vertical_padding=4),
@@ -155,6 +209,15 @@ class SectionDoubleSubtitleBox(BaseBox):
     """Contains the section subtitles for double-column sections."""
 
     def fill(self, text_1: str, text_2: str):
+        """Fills the box with two section subtitles.
+
+        Args:
+            text_1 (str): First subtitle text.
+            text_2 (str): Second subtitle text.
+
+        Returns:
+            self
+        """
         width = self.x1 - self.x0
         self.page.draw_rect(
             pymupdf.Rect(  # first border
@@ -209,6 +272,14 @@ class SectionContentImageBox(BaseBox):
     """Contains the section content in the form of an image, e.g. a plotted graph."""
 
     def fill(self, file_path: Optional[Path] = None):
+        """Fills the box with an image.
+
+        Args:
+            file_path (Optional[Path]): Path to the image file. Default: None.
+
+        Returns:
+            self
+        """
         self.page.draw_rect(self, width=0.5)  # border
         if file_path is not None:  # content
             self.page.insert_image(
@@ -227,8 +298,7 @@ class SectionContentMetadataBox(BaseBox):
         metadata_information: dict[tuple[int, int], SingleMetadataInformation],
         boxes_per_row: int = 5,
     ):
-        """
-        Fills the box with content.
+        """Fills the box with content.
 
         Args:
             metadata_information (dict[tuple[int, int], SingleMetadataInformation]): Dictionary of a
@@ -236,10 +306,10 @@ class SectionContentMetadataBox(BaseBox):
                 SingleMetadataInformation.
                 Row must be 1 or 2, column must be at least 1 and at most boxes_per_row.
                 Per position, at most one information is allowed.
-            boxes_per_row (int): Maximum number of boxes per row. Default: 5
+            boxes_per_row (int): Maximum number of boxes per row. Default: 5.
 
         Raises:
-            ValueError if position is invalid.
+            ValueError: If position is invalid.
 
         Returns:
             self
@@ -288,13 +358,16 @@ class SectionContentMetadataBox(BaseBox):
     @staticmethod
     def _get_padded_rectangle(
         rect: pymupdf.Rect, horizontal_padding: int = 8, vertical_padding: int = 3
-    ):
-        """
-        Returns the given rectangle with inner padding.
+    ) -> pymupdf.Rect:
+        """Returns the given rectangle with inner padding.
 
         Args:
-            horizontal_padding (int): Padding in horizontal direction; default: 8
-            vertical_padding (int): Padding in vertical direction; default: 3
+            rect (pymupdf.Rect): The rectangle to pad.
+            horizontal_padding (int): Padding in horizontal direction; default: 8.
+            vertical_padding (int): Padding in vertical direction; default: 3.
+
+        Returns:
+            pymupdf.Rect: The padded rectangle.
         """
         return pymupdf.Rect(
             rect.x0 + horizontal_padding,

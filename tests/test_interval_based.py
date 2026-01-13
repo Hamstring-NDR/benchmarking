@@ -2,8 +2,6 @@ import datetime
 import unittest
 from unittest.mock import patch, Mock, call, ANY
 
-from confluent_kafka import KafkaException
-
 from src.test_runner.test_types.extended import IntervalBasedTest
 
 
@@ -263,7 +261,7 @@ class TestExecuteSingleInterval(unittest.TestCase):
             sut.custom_fields = {"message_count": Mock()}
             sut.progress_bar = Mock()
 
-            sut.kafka_producer.produce.side_effect = [KafkaException, None]
+            sut.kafka_producer.produce.side_effect = [Exception, None]
 
         with patch(
             "src.test_runner.test_types.extended.datetime"

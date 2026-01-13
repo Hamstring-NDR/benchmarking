@@ -23,7 +23,8 @@ class SimpleKafkaProduceHandler:
     """
 
     def __init__(self):
-        """
+        """Initializes the Kafka producer.
+
         Sets up a Kafka producer with standard configuration for simple message
         production without transactional guarantees. Broker addresses are
         automatically configured from the global KAFKA_BROKERS setting.

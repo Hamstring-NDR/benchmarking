@@ -17,6 +17,12 @@ class PlotGenerator:
     """Plots given data and combines it into figures."""
 
     def __init__(self, plot_name: str, test_identifier: str):
+        """Initializes the plot generator.
+
+        Args:
+            plot_name (str): Name of the plot.
+            test_identifier (str): Identifier of the test run.
+        """
         self.plot_name = plot_name
         self.test_identifier = test_identifier
         self.metadata = ReadWriteUtils.get_metadata(test_identifier)
@@ -28,6 +34,7 @@ class PlotGenerator:
         raise NotImplementedError
 
     def save_to_file(self):
+        """Saves the current figure to a file."""
         output_filepath = ReadWriteUtils.get_plot_output_filepath(
             self.plot_name, self.test_identifier
         )
@@ -37,9 +44,20 @@ class PlotGenerator:
         LOGGER.info(f"File saved at {output_filepath}")
 
     def _get_start_time(self) -> datetime.datetime:
+        """Retrieves the start time of the test from metadata.
+
+        Returns:
+            datetime.datetime: The start timestamp.
+        """
         return self.metadata["start_timestamp"]
 
     def _set_up_initial_figure(self, fig_size: Optional[tuple[float, float]]):
+        """Sets up the initial matplotlib figure.
+
+        Args:
+            fig_size (Optional[tuple[float, float]]): Tuple of (width, height) for the figure.
+                                                      If None, uses default size.
+        """
         if fig_size is None:
             fig_size = self.default_fig_size
 
@@ -50,6 +68,15 @@ class PlotGenerator:
 
     @staticmethod
     def _determine_time_unit(max_value: int, input_unit: str) -> [str, int]:
+        """Determines the best time unit (us, ms, s, min, h, d) for a given value.
+
+        Args:
+            max_value (int): The maximum value to scale against.
+            input_unit (str): The unit of the input value.
+
+        Returns:
+            list[str, int]: A list containing the unit string and the scaling factor.
+        """
         max_value_in_seconds = datetime.timedelta(
             **{input_unit: int(max_value)}
         ).total_seconds()
@@ -81,11 +108,21 @@ class GraphPlotGenerator(PlotGenerator):
 
     @staticmethod
     def _set_x_ticks(x_unit: str):
+        """Sets the ticks on the x-axis.
+
+        Args:
+            x_unit (str): The unit of the x-axis.
+        """
         if x_unit == "s":
             plt.gca().xaxis.set_major_locator(ticker.MultipleLocator(30))
 
     @staticmethod
     def _add_interval_lines(intervals_in_sec: Optional[list[int]]):
+        """Adds vertical dashed lines to indicate intervals.
+
+        Args:
+            intervals_in_sec (Optional[list[int]]): List of interval lengths in seconds.
+        """
         if intervals_in_sec is not None:
             x_values = [0]
 
@@ -100,11 +137,21 @@ class GraphPlotGenerator(PlotGenerator):
     @staticmethod
     @abstractmethod
     def _get_x_label() -> str:
+        """Returns the label for the x-axis.
+
+        Returns:
+            str: The label string.
+        """
         raise NotImplementedError
 
     @staticmethod
     @abstractmethod
     def _get_y_label() -> str:
+        """Returns the label for the y-axis.
+
+        Returns:
+            str: The label string.
+        """
         raise NotImplementedError
 
 
@@ -131,14 +178,15 @@ class LatencyComparisonPlotGenerator(GraphPlotGenerator):
         y_input_unit: str = "microseconds",
         color_start_index: int = 0,
     ):
-        """TODO
-        Creates a figure and plots the given latency data as graphs. All graphs are plotted into the same figure,
-        which is then stored as a file.
+        """Creates a figure and plots the given latency data as graphs.
+
+        All graphs are plotted into the same figure, which is then stored as a file.
 
         Args:
-            median_smooth (bool): True if the data should be smoothed, False by default
-            y_input_unit (str): Unit of the data given as input, "microseconds" by default
-            color_start_index (int): First index of the color palette to be used, 0 by default
+            fig_size (tuple[float, float]): Size of the figure. Default is None.
+            median_smooth (bool): True if the data should be smoothed. Default: True.
+            y_input_unit (str): Unit of the data given as input. Default: "microseconds".
+            color_start_index (int): First index of the color palette to be used. Default: 0.
         """
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
@@ -288,13 +336,14 @@ class FillLevelsComparisonPlotGenerator(GraphPlotGenerator):
         median_smooth: bool = True,
         color_start_index: int = 0,
     ):
-        """TODO
-        Creates a figure and plots the given fill level data as graphs. All graphs are plotted into the same figure,
-        which is then stored as a file.
+        """Creates a figure and plots the given fill level data as graphs.
+
+        All graphs are plotted into the same figure, which is then stored as a file.
 
         Args:
-            median_smooth (bool): True if the data should be smoothed, False by default
-            color_start_index (int): First index of the color palette to be used, 0 by default
+            fig_size (tuple[float, float]): Size of the figure. Default is None.
+            median_smooth (bool): True if the data should be smoothed. Default: True.
+            color_start_index (int): First index of the color palette to be used. Default: 0.
         """
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
@@ -406,13 +455,14 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
         color_start_index: int = 0,
         downsample_factor: int = 500,
     ):
-        """TODO
-        Creates a figure and plots the entering and processed log lines data. All graphs are plotted into the
-        same figure, which is then stored as a file.
+        """Creates a figure and plots the entering and processed log lines data.
+
+        All graphs are plotted into the same figure, which is then stored as a file.
 
         Args:
-            color_start_index (int): First index of the color palette to be used, 0 by default
-            downsample_factor (int): Factor for downsampling data points, 500 by default
+            fig_size (tuple[float, float]): Size of the figure. Default is None.
+            color_start_index (int): First index of the color palette to be used. Default: 0.
+            downsample_factor (int): Factor for downsampling data points. Default: 500.
         """
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
@@ -496,12 +546,12 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
             min_hours_for_hour_buckets: float = 2,
     ):
         """Initialize the plot generator with adaptive time bucket support.
-        
+
         Args:
-            test_identifier: Test identifier for the plot
-            intervals_in_sec: Optional list of intervals in seconds
-            min_minutes_for_minute_buckets: Minimum duration in minutes to use minute buckets (default: 5)
-            min_hours_for_hour_buckets: Minimum duration in hours to use hour buckets (default: 2)
+            test_identifier (str): Test identifier for the plot.
+            intervals_in_sec (Optional[list[int]]): Optional list of intervals in seconds.
+            min_minutes_for_minute_buckets (float): Minimum duration in minutes to use minute buckets. Default: 5.
+            min_hours_for_hour_buckets (float): Minimum duration in hours to use hour buckets. Default: 2.
         """
         plot_name = "entering_processed_per_time"
         super().__init__(plot_name=plot_name, test_identifier=test_identifier)
@@ -520,13 +570,15 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
         y_major_locator: int = 2500,
     ):
         """Creates a bar chart showing entering and processed log lines per time bucket.
+
         Time bucket size is determined adaptively based on data duration.
         Processed data is displayed as negative bars for mirror effect.
 
         Args:
-            bar_width (float): Width of the bars, 0.7 by default
-            x_major_locator (Optional[int]): Major tick interval for x-axis, auto-determined if None
-            y_major_locator (int): Major tick interval for y-axis, 2500 by default
+            fig_size (tuple[float, float]): Size of the figure. Default is None.
+            bar_width (float): Width of the bars. Default: 0.7.
+            x_major_locator (Optional[int]): Major tick interval for x-axis. Auto-determined if None.
+            y_major_locator (int): Major tick interval for y-axis. Default: 2500.
         """
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
@@ -667,12 +719,12 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
 
     def _determine_bucket_unit(self, duration_seconds: float) -> str:
         """Determine the appropriate bucket unit based on data duration using match statement.
-        
+
         Args:
-            duration_seconds: Total duration of the data in seconds
-            
+            duration_seconds (float): Total duration of the data in seconds.
+
         Returns:
-            Bucket unit: "second", "minute", or "hour"
+            str: Bucket unit: "second", "minute", or "hour".
         """
         duration_minutes = duration_seconds / 60
         duration_hours = duration_minutes / 60
@@ -690,14 +742,14 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
             timestamps: pd.Series, start_time: datetime.datetime, bucket_unit: str
     ) -> pd.Series:
         """Calculate time since start in the appropriate unit.
-        
+
         Args:
-            timestamps: Series of timestamps
-            start_time: Start time of the test
-            bucket_unit: Unit for the bucket ("second", "minute", or "hour")
-            
+            timestamps (pd.Series): Series of timestamps.
+            start_time (datetime.datetime): Start time of the test.
+            bucket_unit (str): Unit for the bucket ("second", "minute", or "hour").
+
         Returns:
-            Series with time values in the appropriate unit
+            pd.Series: Series with time values in the appropriate unit.
         """
         time_diff_seconds = (
                 timestamps - start_time.replace(tzinfo=None)
@@ -716,12 +768,12 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
     @staticmethod
     def _get_floor_frequency(bucket_unit: str) -> str:
         """Get the pandas frequency string for floor operation.
-        
+
         Args:
-            bucket_unit: Unit for the bucket ("second", "minute", or "hour")
-            
+            bucket_unit (str): Unit for the bucket ("second", "minute", or "hour").
+
         Returns:
-            Pandas frequency string
+            str: Pandas frequency string.
         """
         match bucket_unit:
             case "second":
@@ -736,12 +788,12 @@ class EnteringProcessedPerTimePlotGenerator(PlotGenerator):
     @staticmethod
     def _get_default_x_major_locator(bucket_unit: str) -> int:
         """Get default x-axis major locator based on bucket unit.
-        
+
         Args:
-            bucket_unit: Unit for the bucket ("second", "minute", or "hour")
-            
+            bucket_unit (str): Unit for the bucket ("second", "minute", or "hour").
+
         Returns:
-            Default interval for x-axis ticks
+            int: Default interval for x-axis ticks.
         """
         match bucket_unit:
             case "second":
@@ -795,7 +847,8 @@ class LatenciesBoxplotGenerator(PlotGenerator):
         """Creates a boxplot figure showing latency distributions for different modules.
 
         Args:
-            y_input_unit (str): Unit of the data given as input, "microseconds" by default
+            fig_size (tuple[float, float]): Size of the figure. Default is None.
+            y_input_unit (str): Unit of the data given as input. Default: "microseconds".
         """
         self._set_up_initial_figure(fig_size)
 

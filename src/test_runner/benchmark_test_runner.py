@@ -16,7 +16,13 @@ CONFIG_TESTS = CONFIG["tests"]
 
 
 class BenchmarkTestRunner:
+    """Manages the execution of different benchmark tests based on command line arguments.
+
+    Parses command line arguments to select and run specific benchmark tests
+    (burst, long_term, maximum_throughput, ramp_up) with configured parameters.
+    """
     def __init__(self):
+        """Initializes the argument parser and sub-parsers for each test type."""
         self.parser = argparse.ArgumentParser(
             description="Execute with given test parameters. "
             "By default, configuration file values are used."
@@ -33,11 +39,17 @@ class BenchmarkTestRunner:
         self.__add_ramp_up_parser()
 
     def run(self):
+        """Parses arguments and executes the selected test function."""
         args = self.parser.parse_args()
         args.func(args)
 
     @staticmethod
     def _execute_burst_with_report(args):
+        """Executes the burst test and generates a report.
+
+        Args:
+             args: Parsed command line arguments containing test configuration.
+        """
         burst_test = BurstTest(
             normal_rate_interval_length=args.normal_interval_length,
             normal_rate_msg_per_sec=args.normal_data_rate,
@@ -49,6 +61,11 @@ class BenchmarkTestRunner:
 
     @staticmethod
     def _execute_long_term_with_report(args):
+        """Executes the long-term test and generates a report.
+
+        Args:
+             args: Parsed command line arguments containing test configuration.
+        """
         long_term_test = LongTermTest(
             full_length_in_minutes=args.length,
             messages_per_second=args.data_rate,
@@ -57,6 +74,11 @@ class BenchmarkTestRunner:
 
     @staticmethod
     def _execute_maximum_throughput_with_report(args):
+        """Executes the maximum throughput test and generates a report.
+
+        Args:
+             args: Parsed command line arguments containing test configuration.
+        """
         maximum_throughput_test = MaximumThroughputTest(
             full_length_in_seconds=args.length,
         )
@@ -64,6 +86,11 @@ class BenchmarkTestRunner:
 
     @staticmethod
     def _execute_ramp_up_with_report(args):
+        """Executes the ramp-up test and generates a report.
+
+        Args:
+             args: Parsed command line arguments containing test configuration.
+        """
         ramp_up_test = RampUpTest(
             messages_per_second_in_intervals=[
                 int(e) for e in args.data_rates.split(",")
@@ -73,6 +100,7 @@ class BenchmarkTestRunner:
         ramp_up_test.execute_and_generate_report()
 
     def __add_burst_parser(self):
+        """Configures the argument parser for the burst test."""
         parser = self.subparsers.add_parser("burst", help="Burst benchmark test")
         parser.add_argument(
             "--normal_data_rate",
@@ -111,6 +139,7 @@ class BenchmarkTestRunner:
         parser.set_defaults(func=self._execute_burst_with_report)
 
     def __add_long_term_parser(self):
+        """Configures the argument parser for the long-term test."""
         parser = self.subparsers.add_parser(
             "long_term", help="Long-term benchmark test"
         )
@@ -129,6 +158,7 @@ class BenchmarkTestRunner:
         parser.set_defaults(func=self._execute_long_term_with_report)
 
     def __add_maximum_throughput_parser(self):
+        """Configures the argument parser for the maximum throughput test."""
         parser = self.subparsers.add_parser(
             "maximum_throughput", help="Maximum-throughput benchmark test"
         )
@@ -141,6 +171,7 @@ class BenchmarkTestRunner:
         parser.set_defaults(func=self._execute_maximum_throughput_with_report)
 
     def __add_ramp_up_parser(self):
+        """Configures the argument parser for the ramp-up test."""
         parser = self.subparsers.add_parser("ramp_up", help="Ramp-up benchmark test")
         default_data_rates = []
         default_durations = []

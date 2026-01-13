@@ -289,7 +289,8 @@ class DatasetLoader:
     """
 
     def __init__(self, base_path: str = "", max_rows: int = -1) -> None:
-        """
+        """Initializes the dataset loader with base path and row limit.
+
         Args:
             base_path (str): Base directory path containing all dataset folders.
             max_rows (int): Maximum rows to load per dataset (default: -1 for unlimited).

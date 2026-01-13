@@ -21,12 +21,15 @@ class IntervalBasedTest(BaseTest):
         interval_lengths_in_seconds: int | float | list[int | float],
         messages_per_second_in_intervals: list[float | int],
     ):
-        """
+        """Initializes an interval-based test.
+
         Args:
-            interval_lengths_in_seconds: Single value to use for each interval, or list of lengths for each interval
-                                         separately
-            messages_per_second_in_intervals: List of message rates per interval. Must have same length as
-                                              interval_lengths_in_seconds, if a list is specified there.
+            name (str): Name of the test.
+            interval_lengths_in_seconds (int | float | list[int | float]): Single value to use for each interval,
+                                                                           or list of lengths for each interval.
+            messages_per_second_in_intervals (list[float | int]): List of message rates per interval.
+                                                                  Must have same length as interval_lengths_in_seconds,
+                                                                  if a list is specified there.
         """
 
         parameters = {
@@ -48,7 +51,9 @@ class IntervalBasedTest(BaseTest):
 
     def _execute_core(self):
         """Executes the test by repeatedly executing single intervals.
-        Updates the progress bar's interval information."""
+
+        Updates the progress bar's interval information.
+        """
         messages_per_second_in_intervals = self.metadata["parameters"][
             "messages_per_second_in_intervals"
         ]
@@ -112,9 +117,10 @@ class IntervalBasedTest(BaseTest):
         return current_index
 
     def __get_total_duration(self) -> timedelta:
-        """
+        """Calculates the total duration of the test run.
+
         Returns:
-            Duration of the full test run as datetime.timedelta, i.e. sum of all intervals
+            timedelta: Duration of the full test run (sum of all intervals).
         """
         interval_lengths_in_seconds = self.metadata["parameters"][
             "interval_lengths_in_seconds"
@@ -124,9 +130,13 @@ class IntervalBasedTest(BaseTest):
 
     @staticmethod
     def __get_total_message_count(parameters: dict) -> int:
-        """
+        """Calculates expected total message count.
+
+        Args:
+            parameters (dict): Test parameters containing interval data.
+
         Returns:
-            Expected number of messages sent throughout the entire test run, rounded to integers.
+            int: Expected number of messages sent throughout the entire test run, rounded to integers.
         """
         messages_per_second_in_intervals = parameters[
             "messages_per_second_in_intervals"
@@ -145,12 +155,14 @@ class IntervalBasedTest(BaseTest):
         messages_per_second_in_intervals: list[float | int],
         intervals: float | int | list[float | int],
     ) -> list[float | int]:
-        """
+        """Normalizes interval lengths to a list format.
+
         Args:
-            intervals (float | int | list[float | int]): Single interval length or list of interval lengths
+            messages_per_second_in_intervals (list[float | int]): Reference list of message rates.
+            intervals (float | int | list[float | int]): Single interval length or list of interval lengths.
 
         Returns:
-            List of interval lengths. If single value was given, all entries are the same.
+            list[float | int]: List of interval lengths. If single value was given, all entries are the same.
         """
         if not isinstance(intervals, list):
             intervals = [
@@ -161,6 +173,14 @@ class IntervalBasedTest(BaseTest):
 
     @staticmethod
     def __validate_interval_data(parameters: dict):
+        """Validates that interval lengths and message rates match.
+
+        Args:
+            parameters (dict): Test parameters containing interval data.
+
+        Raises:
+            ValueError: If lengths of interval lists do not match.
+        """
         messages_per_second_in_intervals = parameters[
             "messages_per_second_in_intervals"
         ]
@@ -185,10 +205,12 @@ class SingleIntervalTest(BaseTest):
         full_length_in_minutes: float | int,
         messages_per_second: float | int,
     ):
-        """
+        """Initializes a single interval test.
+
         Args:
-            full_length_in_minutes (float | int): Duration in minutes for which to send messages
-            messages_per_second (float | int): Number of messages per second when sending messages
+            name (str): Name of the test.
+            full_length_in_minutes (float | int): Duration in minutes for which to send messages.
+            messages_per_second (float | int): Number of messages per second when sending messages.
         """
 
         parameters = {
@@ -204,8 +226,10 @@ class SingleIntervalTest(BaseTest):
         )
 
     def _execute_core(self):
-        """Produces messages for the specified duration and updates the
-        progress bar accordingly."""
+        """Produces messages for the specified duration.
+
+        Updates the progress bar accordingly.
+        """
         start_timestamp = datetime.now()
         messages_per_second = self.metadata["parameters"]["messages_per_second"]
         full_length_in_minutes = self.metadata["parameters"]["full_length_in_minutes"]
@@ -240,10 +264,12 @@ class SingleIntervalTest(BaseTest):
 
         self.progress_bar.update(100)
 
-    def __get_total_message_count(self, parameters: dict):
-        """
+    @staticmethod
+    def __get_total_message_count(parameters: dict):
+        """Calculates expected total message count.
+
         Returns:
-            Expected number of messages sent throughout the entire test run, rounded to integers.
+            int: Expected number of messages sent throughout the entire test run, rounded to integers.
         """
         messages_per_second = parameters["messages_per_second"]
         full_length_in_minutes = parameters["full_length_in_minutes"]

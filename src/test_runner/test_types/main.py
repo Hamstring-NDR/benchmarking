@@ -26,6 +26,15 @@ class BurstTest(IntervalBasedTest):
         burst_rate_interval_length: float | int,
         number_of_repetitions: int = 1,
     ):
+        """Initializes a burst test.
+
+        Args:
+            normal_rate_msg_per_sec (float | int): Message rate during normal periods.
+            burst_rate_msg_per_sec (float | int): Message rate during burst periods.
+            normal_rate_interval_length (float | int): Duration of normal periods in seconds.
+            burst_rate_interval_length (float | int): Duration of burst periods in seconds.
+            number_of_repetitions (int): Number of burst cycles to repeat. Default: 1.
+        """
         interval_lengths_in_seconds = [normal_rate_interval_length]
         messages_per_second_in_intervals = [normal_rate_msg_per_sec]
 
@@ -50,10 +59,11 @@ class LongTermTest(SingleIntervalTest):
     def __init__(
         self, full_length_in_minutes: float | int, messages_per_second: float | int
     ):
-        """
+        """Initializes a long-term test.
+
         Args:
-            full_length_in_minutes (float | int): Duration in minutes for which to send messages
-            messages_per_second (float | int): Number of messages per second when sending messages
+            full_length_in_minutes (float | int): Duration in minutes for which to send messages.
+            messages_per_second (float | int): Number of messages per second when sending messages.
         """
         self.messages_per_second = messages_per_second
         self.full_length_in_minutes = full_length_in_minutes
@@ -76,10 +86,12 @@ class MaximumThroughputTest(SingleIntervalTest):
         full_length_in_seconds: float | int,
         messages_per_second: float | int = 10000,
     ):
-        """
+        """Initializes a maximum throughput test.
+
         Args:
-            full_length_in_seconds (float | int): Duration in seconds for which to send messages
-            messages_per_second (float | int): Number of messages per second when sending messages
+            full_length_in_seconds (float | int): Duration in seconds for which to send messages.
+            messages_per_second (float | int): Number of messages per second when sending messages.
+                                               Default: 10000.
         """
         super().__init__(
             name="Maximum Throughput",
@@ -99,12 +111,12 @@ class RampUpTest(IntervalBasedTest):
         interval_lengths_in_seconds: int | float | list[int | float],
         messages_per_second_in_intervals: list[float | int],
     ):
-        """
+        """Initializes a ramp-up test.
+
         Args:
-            interval_lengths_in_seconds: Single value to use for each interval, or list of lengths for each interval
-                                         separately
-            messages_per_second_in_intervals: List of message rates per interval. Must have same length as
-                                              interval_lengths_in_seconds, if a list is specified there.
+            interval_lengths_in_seconds (int | float | list[int | float]): Single value to use for each interval,
+                                                                           or list of lengths for each interval.
+            messages_per_second_in_intervals (list[float | int]): List of message rates per interval.
         """
         super().__init__(
             "Ramp Up",

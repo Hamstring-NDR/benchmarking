@@ -35,6 +35,12 @@ class PDFOverviewGenerator:
     """Combines multiple plots and test information in a PDF document."""
 
     def __init__(self, metadata_configuration: MetadataConfiguration):
+        """Initializes the PDF overview generator.
+
+        Args:
+            metadata_configuration (MetadataConfiguration): Configuration for extracting and formatting
+                                                            test-specific metadata.
+        """
         self.page_width, self.page_height = 595, 842  # page dimension: A4 portrait
         self.standard_page_margin = {"left": 50, "right": 50, "top": 50, "bottom": 50}
 
@@ -54,13 +60,16 @@ class PDFOverviewGenerator:
 
         Args:
             test_identifier (str): Identifying name of the benchmark_results directory for this test. Usually
-                                             of the form "20250101_120000_ramp_up".
+                                   of the form "20250101_120000_ramp_up".
             input_file_paths (dict[str, Path]): Dictionary of input file paths for each figure position. Is set
                                                 automatically to point to the graphs in
                                                 'heiDGAF/benchmark_results/[TEST_DIRECTORY_IDENTIFIER]/graphs' and
                                                 the metadata file
                                                 'heiDGAF/benchmark_results/[TEST_DIRECTORY_IDENTIFIER]/metadata.yml'.
-            benchmark_test_date: Date on which the test finished.
+            benchmark_test_date (datetime.date): Date on which the test finished. Default: today.
+
+        Raises:
+            ValueError: If neither test_identifier nor input_file_paths are provided.
         """
         if input_file_paths is None and test_identifier is not None:
             input_file_paths = {

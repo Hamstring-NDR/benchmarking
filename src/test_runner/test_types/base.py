@@ -45,11 +45,18 @@ class BaseTest:
         is_interval_based: bool = False,
         parameters: Optional[dict[str, Any]] = None,
     ):
-        """
+        """Initializes the base test with common parameters.
+
         Args:
-            TODO: Update
-            total_message_count: Total number of messages to be sent during full test run
-            is_interval_based: True if intervals are used, False for tests without intervals
+            name (str): Name of the test.
+            total_message_count (int): Total number of messages to be sent during full test run.
+            is_interval_based (bool): True if intervals are used, False for tests without intervals.
+                                      Default: False.
+            parameters (Optional[dict[str, Any]]): Dictionary of test-specific parameters.
+                                                   Default: None.
+
+        Raises:
+            ValueError: If total_message_count is less than 1.
         """
         if total_message_count < 1:
             raise ValueError("Given argument 'total_message_count' must be at least 1.")
@@ -201,12 +208,12 @@ class BaseTest:
             output_filename=output_filename,
         )
 
-    def _setup_progress_bar(self):
-        """
-        Sets up the progressbar and returns it including its customizable fields.
+    def _setup_progress_bar(self) -> tuple[progressbar.ProgressBar, dict]:
+        """Sets up the progressbar and returns it including its customizable fields.
 
         Returns:
-            progressbar.Progressbar, custom_fields (dict)
+            tuple[progressbar.ProgressBar, dict]: A tuple containing the configured progress bar
+                                                  and a dictionary of custom fields.
         """
         custom_fields = {
             "message_count": progressbar.FormatCustomText(  # show the number of messages already sent
@@ -240,9 +247,10 @@ class BaseTest:
         return progress_bar, custom_fields
 
     def _get_time_elapsed(self) -> timedelta:
-        """
+        """Calculates the time elapsed since the start of the test.
+
         Returns:
-            Time elapsed as datetime.timedelta since the start of the test
+            timedelta: Time elapsed since the start of the test.
         """
         return datetime.now() - self.progress_bar.start_time
 
@@ -417,7 +425,17 @@ class BenchmarkDatasetGenerator:
     def generate_random_logline(
         self, statuses: list[str] = None, record_types: list[str] = None
     ):
-        """Generates a (mostly) random logline."""
+        """Generates a pseudo-random DNS log line.
+
+        Args:
+            statuses (list[str], optional): List of possible status codes.
+                                            Default: ["NOERROR", "NXDOMAIN"].
+            record_types (list[str], optional): List of possible DNS record types.
+                                                Default: 6*AAAA, 10*A, PR, CNAME.
+
+        Returns:
+            str: A single log line string matching the simplified common log format.
+        """
         if record_types is None:
             record_types = 6 * ["AAAA"] + 10 * ["A"] + ["PR", "CNAME"]
 
@@ -469,10 +487,23 @@ class BenchmarkDatasetGenerator:
         return f"{timestamp} {status} {client_ip} {server_ip} {domain} {record_type} {response_ip_address} {size}"
 
     def get_random_domain(self) -> str:
+        """Selects a random domain from the loaded dataset.
+
+        Returns:
+            str: A domain query string.
+        """
         random_domain = self.domains.sample(n=1)
         return random_domain["query"].item()
 
     def generate_dataset(self, number_of_elements: int) -> list[str]:
+        """Generates a dataset of random log lines.
+
+        Args:
+            number_of_elements (int): Number of log lines to generate.
+
+        Returns:
+            list[str]: List of generated log line strings.
+        """
         dataset = []
 
         for _ in range(number_of_elements):

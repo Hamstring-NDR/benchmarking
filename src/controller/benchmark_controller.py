@@ -12,6 +12,7 @@ class BenchmarkController:
     """Contains methods for running tests on remote hosts."""
 
     def __init__(self):
+        """Initializes the BenchmarkController."""
         self.test_parameters = None
 
     def run_single_test(
@@ -19,8 +20,20 @@ class BenchmarkController:
         test_name: str,
         docker_container_name: str = "benchmark_test_runner",
     ):
-        """Sends the command to the test runner container to start the respective test with the configured
-        parameters."""
+        """Executes a single benchmark test on the test runner container.
+
+        Sends the command to the test runner container to start the respective test
+        with the configured parameters.
+
+        Args:
+            test_name (str): Name of the test to run.
+            docker_container_name (str, optional): Name of the Docker container.
+                                                   Default: "benchmark_test_runner".
+
+        Raises:
+            ValueError: If the test name is unknown or invalid.
+            subprocess.CalledProcessError: If the test command fails.
+        """
         self.test_parameters = CONFIG["tests"][test_name]
 
         match test_name:  # acts as whitelist
@@ -56,11 +69,19 @@ class BenchmarkController:
         self.test_parameters = None
 
     def run_configured_tests_sequentially(self):
-        """Runs the tests from the configuration sequentially."""
+        """Runs all configured tests sequentially."""
         for test_run in CONFIG["test_runs"]:
             self.run_single_test(test_run)
 
     def __handle_ramp_up_input(self) -> list[str]:
+        """Parses and validates ramp-up test parameters.
+
+        Returns:
+            list[str]: list of command-line arguments for the ramp-up test.
+
+        Raises:
+            ValueError: If parameters have invalid types.
+        """
         try:
             # check type for data rates
             for i in [interval[0] for interval in self.test_parameters["intervals"]]:
@@ -88,6 +109,14 @@ class BenchmarkController:
         ]  # arguments
 
     def __handle_burst_input(self) -> list[str]:
+        """Parses and validates burst test parameters.
+
+        Returns:
+            list[str]: list of command-line arguments for the burst test.
+
+        Raises:
+            ValueError: If parameters have invalid types.
+        """
         try:
             # check types
             normal_data_rate = float(self.test_parameters["normal_rate"]["data_rate"])
@@ -116,6 +145,14 @@ class BenchmarkController:
         ]  # arguments
 
     def __handle_maximum_throughput(self) -> list[str]:
+        """Parses and validates maximum throughput test parameters.
+
+        Returns:
+            list[str]: list of command-line arguments for the maximum throughput test.
+
+        Raises:
+            ValueError: If parameters have invalid types.
+        """
         try:
             # check type
             length = float(self.test_parameters["length"])
@@ -125,6 +162,14 @@ class BenchmarkController:
         return ["--length", str(length)]  # arguments
 
     def __handle_long_term(self) -> list[str]:
+        """Parses and validates long-term test parameters.
+
+        Returns:
+            list[str]: list of command-line arguments for the long-term test.
+
+        Raises:
+            ValueError: If parameters have invalid types.
+        """
         try:
             # check types
             data_rate = float(self.test_parameters["data_rate"])
@@ -141,6 +186,14 @@ class BenchmarkController:
 
     @staticmethod
     def __validate_name(name: str):
+        """Validates that a name contains only alphanumeric characters and underscores.
+
+        Args:
+            name (str): Name to validate.
+
+        Raises:
+            ValueError: If the name contains invalid characters.
+        """
         if not bool(re.match(r"[a-zA-Z0-9_]", name)):
             raise ValueError(
                 "Test Name can only include alphabetic letters, numbers, and underscores"

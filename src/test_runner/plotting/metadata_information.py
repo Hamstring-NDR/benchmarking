@@ -14,6 +14,11 @@ class IntegerMetadataInformation(SingleMetadataInformation):
     """Includes a title and an informative integer value."""
 
     def __init__(self, title: str, value: int):
+        """
+        Args:
+            title (str): Descriptive title of the information.
+            value (int): Integer value to display.
+        """
         str_value = f"{value:,}"
 
         super().__init__(title=title, value=str_value)
@@ -23,6 +28,11 @@ class DurationMetadataInformation(SingleMetadataInformation):
     """Includes a title and an informative value, indicating duration in hours, minutes and seconds."""
 
     def __init__(self, title: str, value: timedelta):
+        """
+        Args:
+            title (str): Descriptive title of the information.
+            value (timedelta): Duration to display.
+        """
         str_value = self._format_timedelta(value)
 
         super().__init__(title=title, value=str_value)
@@ -52,9 +62,9 @@ class NumberPerTimeMetadataInformation(SingleMetadataInformation):
     def __init__(self, title: str, value: float, per: str):
         """
         Args:
-            title: Descriptive title of the information.
-            value: Value per time, e.g. 27.4 for 27.4/s.
-            per: Per time, must be "s", "min" or "h".
+            title (str): Descriptive title of the information.
+            value (float): Value per time, e.g. 27.4 for 27.4/s.
+            per (str): Per time, must be "s", "min" or "h".
         """
         str_value = self._format_rate(value, per)
 
@@ -91,9 +101,9 @@ class RangeNumberPerTimeMetadataInformation(SingleMetadataInformation):
     def __init__(self, title: str, values: float | list[float], per: str):
         """
         Args:
-            title: Descriptive title of the information.
-            values: List of values per time, e.g. [27.4, 31.2] for 27.4/s - 31.2/s.
-            per: Per time, must be "s", "min" or "h".
+            title (str): Descriptive title of the information.
+            values (float | list[float]): List of values per time, e.g. [27.4, 31.2] for 27.4/s - 31.2/s.
+            per (str): Per time, must be "s", "min" or "h".
         """
         if not isinstance(values, list):
             values = [values]
@@ -137,6 +147,12 @@ class HourMinuteSecondMetadataInformation(SingleMetadataInformation):
     """Includes a title and an informative time value, which is displayed as hour, minute, and second."""
 
     def __init__(self, title: str, value: datetime, include_date: bool = True):
+        """
+        Args:
+            title (str): Descriptive title of the information.
+            value (datetime): Time value to display.
+            include_date (bool): If True, includes the date in the title. Default: True.
+        """
         str_value = value.strftime("%H:%M:%S")
 
         if include_date:

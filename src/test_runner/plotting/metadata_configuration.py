@@ -16,9 +16,26 @@ class MetadataConfiguration:
 
     @abstractmethod
     def get(self, *args) -> dict[tuple[int, int], SingleMetadataInformation]:
+        """Retrieves and formats metadata for the overview page.
+
+        Args:
+           *args: Variable length argument list.
+
+        Returns:
+            dict[tuple[int, int], SingleMetadataInformation]: A dictionary mapping grid positions (row, col)
+                                                              to metadata information objects.
+        """
         raise NotImplementedError
 
     def _get_total_number_of_entering_loglines(self, test_identifier: str):
+        """Calculates the total number of entering log lines for a specific test.
+
+        Args:
+            test_identifier (str): The identifier of the test.
+
+        Returns:
+            int: Total cumulative count of entering log lines. Returns None if no data.
+        """
         modules_to_csv_paths = ReadWriteUtils.get_modules_to_csv_filepaths(
             "entering_processed_total", test_identifier
         )
@@ -35,6 +52,17 @@ class MetadataConfiguration:
 class BurstMetadata(MetadataConfiguration):
 
     def get(self, metadata: dict) -> dict[tuple[int, int], SingleMetadataInformation]:
+        """Retrieves metadata for Burst tests.
+
+        Args:
+            metadata (dict): Dictionary containing test metadata.
+
+        Returns:
+            dict[tuple[int, int], SingleMetadataInformation]: Formatted metadata for the report.
+
+        Raises:
+            ValueError: If metadata is missing or malformed.
+        """
         try:
             start_timestamp = metadata["start_timestamp"]
             end_timestamp = metadata["end_timestamp"]
@@ -94,6 +122,17 @@ class BurstMetadata(MetadataConfiguration):
 class LongTermMetadata(MetadataConfiguration):
 
     def get(self, metadata: dict) -> dict[tuple[int, int], SingleMetadataInformation]:
+        """Retrieves metadata for Long Term tests.
+
+        Args:
+            metadata (dict): Dictionary containing test metadata.
+
+        Returns:
+            dict[tuple[int, int], SingleMetadataInformation]: Formatted metadata for the report.
+
+        Raises:
+            ValueError: If metadata is missing or malformed.
+        """
         try:
             start_timestamp = metadata["start_timestamp"]
             end_timestamp = metadata["end_timestamp"]
@@ -132,6 +171,17 @@ class LongTermMetadata(MetadataConfiguration):
 class MaximumThroughputMetadata(MetadataConfiguration):
 
     def get(self, metadata: dict) -> dict[tuple[int, int], SingleMetadataInformation]:
+        """Retrieves metadata for Maximum Throughput tests.
+
+        Args:
+            metadata (dict): Dictionary containing test metadata.
+
+        Returns:
+            dict[tuple[int, int], SingleMetadataInformation]: Formatted metadata for the report.
+
+        Raises:
+            ValueError: If metadata is missing or malformed.
+        """
         try:
             start_timestamp = metadata["start_timestamp"]
             end_timestamp = metadata["end_timestamp"]
@@ -170,6 +220,18 @@ class MaximumThroughputMetadata(MetadataConfiguration):
 class RampUpMetadata(MetadataConfiguration):
 
     def get(self, metadata: dict, test_identifier: str) -> dict[tuple[int, int], SingleMetadataInformation]:
+        """Retrieves metadata for Ramp Up tests.
+
+        Args:
+            metadata (dict): Dictionary containing test metadata.
+            test_identifier (str): The identifier of the test.
+
+        Returns:
+            dict[tuple[int, int], SingleMetadataInformation]: Formatted metadata for the report.
+
+        Raises:
+            ValueError: If metadata is missing or malformed.
+        """
         try:
             start_timestamp = metadata["start_timestamp"]
             end_timestamp = metadata["end_timestamp"]
