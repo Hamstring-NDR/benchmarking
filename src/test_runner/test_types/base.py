@@ -32,7 +32,7 @@ from src.test_runner.plotting.plot_generator import (
 )
 from src.test_runner.test_types import LATENCIES_COMPARISON_FILENAME, CLICKHOUSE_CONTAINER_NAME
 
-LOGGER = get_logger()
+LOGGER = get_logger("test_runner.test_types")
 
 
 class BaseTest:

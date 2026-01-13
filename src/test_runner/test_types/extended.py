@@ -9,7 +9,7 @@ from src.test_runner.plotting.metadata_configuration import (
 from src.test_runner.test_types import PRODUCE_TO_TOPIC
 from src.test_runner.test_types.base import BaseTest
 
-LOGGER = get_logger()
+LOGGER = get_logger("test_runner.test_types")
 
 
 class IntervalBasedTest(BaseTest):

@@ -4,7 +4,7 @@ import subprocess
 from src.base.logging_config import get_logger
 from src.base.setup_config import setup_config
 
-LOGGER = get_logger()
+LOGGER = get_logger("controller.benchmark_controller")
 CONFIG = setup_config()
 
 

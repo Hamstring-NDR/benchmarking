@@ -9,7 +9,7 @@ from src.test_runner.test_types.main import (
     LongTermTest,
 )
 
-LOGGER = get_logger()
+LOGGER = get_logger("test_runner.benchmark_test_runner")
 CONFIG = setup_config()
 
 CONFIG_TESTS = CONFIG["tests"]

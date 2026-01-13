@@ -11,7 +11,7 @@ from src.test_runner.test_types.extended import (
     IntervalBasedTest,
 )
 
-LOGGER = get_logger()
+LOGGER = get_logger("test_runner.test_types")
 
 
 class BurstTest(IntervalBasedTest):

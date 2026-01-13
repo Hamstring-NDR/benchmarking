@@ -10,7 +10,7 @@ from src.base.logging_config import get_logger
 from src.base.utils import ReadWriteUtils
 from src.test_runner.plotting.colors import Colors
 
-LOGGER = get_logger()
+LOGGER = get_logger("test_runner.plotting.plot_generator")
 
 
 class PlotGenerator:
