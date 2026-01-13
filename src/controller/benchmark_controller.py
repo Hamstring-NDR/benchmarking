@@ -55,15 +55,28 @@ class BenchmarkController:
         docker_container_name = str(docker_container_name)
         self.__validate_name(docker_container_name)
 
-        cmd = [
-            # "docker",  # TODO: Use SSH
-            # "exec",
-            # docker_container_name,
+        remote_config = CONFIG.get("remote_execution", {})
+        is_remote_execution = remote_config.get("enabled", False)
+
+        cmd = []
+
+        if is_remote_execution:
+            LOGGER.info(f"Running test '{test_name}' on remote host {remote_config['host']}")
+            cmd.extend([
+                "ssh",
+                "-i",
+                remote_config["key_path"],
+                remote_config["host"],
+            ])
+
+        cmd.extend([
             "python",
-            f"src/test_runner/benchmark_test_runner.py",
+            "src/test_runner/benchmark_test_runner.py",
             test_name,
             *arguments,
-        ]
+        ])
+
+        LOGGER.debug(f"Executing command: {' '.join(cmd)}")
         subprocess.run(cmd).check_returncode()
 
         self.test_parameters = None
