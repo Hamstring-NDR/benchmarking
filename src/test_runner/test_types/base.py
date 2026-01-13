@@ -192,7 +192,7 @@ class BaseTest:
             test_identifier=test_identifier,
             benchmark_test_date=datetime.date(
                 self.metadata["end_timestamp"]
-            ),  # TODO: Test
+            ),
         )
 
         # generate and save report

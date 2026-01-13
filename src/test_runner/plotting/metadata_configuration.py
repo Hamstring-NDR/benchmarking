@@ -1,5 +1,8 @@
 from abc import abstractmethod
 
+import pandas as pd
+
+from src.base.utils import ReadWriteUtils
 from src.test_runner.plotting.metadata_information import (
     DurationMetadataInformation,
     NumberPerTimeMetadataInformation,
@@ -10,9 +13,23 @@ from src.test_runner.plotting.metadata_information import (
 
 
 class MetadataConfiguration:
+
     @abstractmethod
-    def get(self, metadata: dict) -> dict[tuple[int, int], SingleMetadataInformation]:
+    def get(self, *args) -> dict[tuple[int, int], SingleMetadataInformation]:
         raise NotImplementedError
+
+    def _get_total_number_of_entering_loglines(self, test_identifier: str):
+        modules_to_csv_paths = ReadWriteUtils.get_modules_to_csv_filepaths(
+            "entering_processed_total", test_identifier
+        )
+
+        df = pd.read_csv(modules_to_csv_paths["Entering"])
+        if df.empty:
+            return
+
+        df["timestamp_in"] = pd.to_datetime(df["timestamp_in"])
+        latest_row = df.sort_values(by="timestamp_in").iloc[-1]
+        return int(latest_row["cumulative_count"])
 
 
 class BurstMetadata(MetadataConfiguration):
@@ -151,14 +168,13 @@ class MaximumThroughputMetadata(MetadataConfiguration):
 
 
 class RampUpMetadata(MetadataConfiguration):
-    def __init__(self):
-        self.total_ingoing_loglines = 12345  # TODO: Only for testing
 
-    def get(self, metadata: dict) -> dict[tuple[int, int], SingleMetadataInformation]:
+    def get(self, metadata: dict, test_identifier: str) -> dict[tuple[int, int], SingleMetadataInformation]:
         try:
             start_timestamp = metadata["start_timestamp"]
             end_timestamp = metadata["end_timestamp"]
             parameters = metadata["parameters"]
+            total_ingoing_loglines = self._get_total_number_of_entering_loglines(test_identifier)
 
             # calculation
             total_duration = end_timestamp - start_timestamp
@@ -198,7 +214,7 @@ class RampUpMetadata(MetadataConfiguration):
             ),
             (2, 2): NumberPerTimeMetadataInformation(
                 title="Ingoing logline rate",
-                value=self.total_ingoing_loglines / total_duration.total_seconds(),
+                value=total_ingoing_loglines / total_duration.total_seconds(),
                 per="s",
             ),
             (2, 3): SingleMetadataInformation(

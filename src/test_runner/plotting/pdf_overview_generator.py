@@ -141,7 +141,7 @@ class PDFOverviewGenerator:
                 width=usable_width,
                 height=self.row_heights["overview_page"][2] * usable_height,
                 top_padding=sum(self.row_heights["overview_page"][:2]) * usable_height,
-            ).fill(self.metadata_configuration.get(metadata))
+            ).fill(self.metadata_configuration.get(metadata, test_identifier))
         )
 
         self.boxes["overview_page"]["main_graph_title_row"].append(

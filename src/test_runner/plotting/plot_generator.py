@@ -133,12 +133,12 @@ class LatencyComparisonPlotGenerator(GraphPlotGenerator):
     ):
         """TODO
         Creates a figure and plots the given latency data as graphs. All graphs are plotted into the same figure,
-                which is then stored as a file.
+        which is then stored as a file.
 
-                Args:
-                    median_smooth (bool): True if the data should be smoothed, False by default
-                    y_input_unit (str): Unit of the data given as input, "microseconds" by default
-                    color_start_index (int): First index of the color palette to be used, 0 by default
+        Args:
+            median_smooth (bool): True if the data should be smoothed, False by default
+            y_input_unit (str): Unit of the data given as input, "microseconds" by default
+            color_start_index (int): First index of the color palette to be used, 0 by default
         """
         self._set_up_initial_figure(fig_size)
         start_time = self._get_start_time()
