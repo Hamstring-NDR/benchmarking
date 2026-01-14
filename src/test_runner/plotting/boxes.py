@@ -339,21 +339,68 @@ class SectionContentMetadataBox(BaseBox):
 
                     self.page.draw_rect(box, width=0.5)
 
-                    # TODO: Handle long strings that do not fit in the box
+                    title_text = metadata_information[(row + 1, column + 1)].title
+                    padded_box = self._get_padded_rectangle(box, vertical_padding=5)
+                    available_width = padded_box.width - 4
+
+                    final_title, _ = self._get_optimized_text_and_fontsize(
+                        title_text, available_width, max_font_size=6, min_font_size=6,
+                    )
 
                     self.page.insert_htmlbox(  # title
-                        self._get_padded_rectangle(box, vertical_padding=5),
-                        metadata_information[(row + 1, column + 1)].title,
-                        css="* {font-family: sans-serif; font-size: 6px; text-align: center}",
+                        padded_box,
+                        final_title,
+                        css="* {font-family: sans-serif; font-size: 6px; text-align: center; white-space: nowrap}",
                     )
+
+                    value_text = metadata_information[(row + 1, column + 1)].value
+
+                    final_text, font_size = self._get_optimized_text_and_fontsize(
+                        value_text, available_width, min_font_size=10
+                    )
+
                     self.page.insert_htmlbox(  # value
-                        self._get_padded_rectangle(box, vertical_padding=5),
-                        metadata_information[(row + 1, column + 1)].value,
-                        css="* {font-family: sans-serif; font-size: 13px; text-align: center;"
-                        "padding: 5px 0}",
+                        padded_box,
+                        final_text,
+                        css=f"* {{font-family: sans-serif; font-size: {font_size}px; "
+                            f"text-align: center; padding: 5px 0; white-space: nowrap}}",
                     )
 
         return self
+
+    def _get_optimized_text_and_fontsize(
+            self, text: str, max_width: float, max_font_size: int = 13, min_font_size: int = 6
+    ) -> tuple[str, int]:
+        """Calculates the best font size for the text to fit in the width.
+        Truncates text if it doesn't fit even with minimum font size.
+
+        Args:
+            text (str): The text to check.
+            max_width (float): The maximum available width.
+            max_font_size (int): Max font size to start with. Default: 13.
+            min_font_size (int): Min font size to go down to. Default: 6.
+
+        Returns:
+            tuple[str, int]: The (possibly truncated) text and the determined font size.
+        """
+        font = pymupdf.Font("helv")
+
+        for size in range(max_font_size, min_font_size - 1, -1):
+            if font.text_length(text, fontsize=size) <= max_width:
+                return text, size
+
+        # If way too big, truncate.
+        ellipsis_width = font.text_length("...", fontsize=min_font_size)
+
+        for i in range(len(text), 0, -1):
+            truncated = text[:i]
+            if (
+                    font.text_length(truncated, fontsize=min_font_size) + ellipsis_width
+                    <= max_width
+            ):
+                return truncated + "...", min_font_size
+
+        return "...", min_font_size  # Should almost never happen unless box is tiny
 
     @staticmethod
     def _get_padded_rectangle(
