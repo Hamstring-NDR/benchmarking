@@ -471,6 +471,10 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
             self.plot_name, self.test_identifier
         )
 
+        # 1. Determine total max time to choose unit
+        total_max_time = 0
+        dataframes = {}
+
         for name, file in modules_to_csv_paths.items():
             df = pd.read_csv(file)
 
@@ -495,24 +499,43 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
                 df[timestamp_col] - start_time.replace(tzinfo=None)
             ).dt.total_seconds()
 
-            self.__plot_core(name, df, downsample_factor, Colors().get_color(name))
+            dataframes[name] = df
+
+            max_time = df["time"].max()
+            if max_time > total_max_time:
+                total_max_time = max_time
+
+        x_unit, x_scale = self._determine_time_unit(total_max_time, "seconds")
+
+        # 2. Plot
+        for name, df in dataframes.items():
+            self.__plot_core(
+                name, df, downsample_factor, Colors().get_color(name), x_scale
+            )
 
         self._add_interval_lines(self.intervals_in_sec)
 
         plt.xlim(left=0)
-        self._set_x_ticks("s")  # TODO: Make more flexible
+        self._set_x_ticks(x_unit)
 
         self._activate_grid()
-        self._set_labels()
+        self._set_labels(x_unit)
 
         plt.legend()
 
         self.save_to_file()
 
-    def __plot_core(self, name: str, df: pd.DataFrame, downsample_factor: int, color):
+    def __plot_core(
+            self,
+            name: str,
+            df: pd.DataFrame,
+            downsample_factor: int,
+            color,
+            x_scale: int,
+    ):
         n = max(1, len(df) // downsample_factor)  # downsample for better performance
         plt.plot(
-            df["time"][::n],
+            df["time"][::n] * (10 ** 6) / x_scale,
             df["cumulative_count"][::n],
             linestyle="-",
             label=name,
@@ -527,8 +550,8 @@ class EnteringProcessedTotalPlotGenerator(GraphPlotGenerator):
     def _get_y_label():
         return "Accumulated number of log lines"
 
-    def _set_labels(self):
-        plt.xlabel(f"{self._get_x_label()} [s]", labelpad=10)
+    def _set_labels(self, x_unit: str):
+        plt.xlabel(f"{self._get_x_label()} [{x_unit}]", labelpad=10)
         plt.ylabel(self._get_y_label())
 
     @staticmethod
@@ -856,8 +879,9 @@ class LatenciesBoxplotGenerator(PlotGenerator):
             self.plot_name, self.test_identifier
         )
 
-        data = []
+        data_microseconds = []
         labels = []
+        max_val_us = 0
 
         for name, file in modules_to_csv_paths.items():
             df = pd.read_csv(file, parse_dates=["time"]).sort_values(by="time")
@@ -865,21 +889,33 @@ class LatenciesBoxplotGenerator(PlotGenerator):
             if df.empty:
                 continue  # skip empty datafiles
 
-            # convert to seconds based on input unit
+            # convert to microseconds based on input unit for standardization
             if y_input_unit == "microseconds":
-                data.append(df["value"] / (10**6))
+                vals = df["value"]
             elif y_input_unit == "milliseconds":
-                data.append(df["value"] / (10**3))
+                vals = df["value"] * 1000
             elif y_input_unit == "seconds":
-                data.append(df["value"])
+                vals = df["value"] * (10 ** 6)
             else:
-                data.append(df["value"])
+                LOGGER.warning(
+                    f"Unknown input unit '{y_input_unit}', assuming microseconds"
+                )
+                vals = df["value"]
 
+            current_max = vals.max()
+            if current_max > max_val_us:
+                max_val_us = current_max
+
+            data_microseconds.append(vals)
             labels.append(name)
+
+        y_unit, factor = self._determine_time_unit(max_val_us, "microseconds")
+
+        data = [d / factor for d in data_microseconds]
 
         self.__plot_core(data, labels)
         self._activate_grid()
-        self._set_labels()
+        self._set_labels(y_unit)
 
         self.save_to_file()
 
@@ -901,11 +937,11 @@ class LatenciesBoxplotGenerator(PlotGenerator):
         )
 
     @staticmethod
-    def _get_y_label():
-        return "Latency in module [s]"  # TODO: Make more flexible
+    def _get_y_label(unit: str):
+        return f"Latency in module [{unit}]"
 
-    def _set_labels(self):
-        plt.ylabel(self._get_y_label())
+    def _set_labels(self, unit: str):
+        plt.ylabel(self._get_y_label(unit))
 
     @staticmethod
     def _get_boxplot_style() -> dict:
