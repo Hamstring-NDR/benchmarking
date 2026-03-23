@@ -1,0 +1,45 @@
+latency_comparison:
+  output_filename: "latency_comparison.png"
+  files:
+    "Batch Handler": "latencies/batch_handler.csv"
+    "Collector": "latencies/collector.csv"
+    "Detector": "latencies/detector.csv"
+    "Inspector": "latencies/inspector.csv"
+    "Log Server": "latencies/logserver.csv"
+    "Prefilter": "latencies/prefilter.csv"
+
+latencies_boxplot:
+  output_filename: "latencies_boxplot.png"
+  files:
+    "Batch Handler": "latencies/batch_handler.csv"
+    "Collector": "latencies/collector.csv"
+    "Detector": "latencies/detector.csv"
+    "Inspector": "latencies/inspector.csv"
+    "Log Server": "latencies/logserver.csv"
+    "Prefilter": "latencies/prefilter.csv"
+
+fill_levels_comparison:
+  output_filename: "fill_levels_comparison.png"
+  files:
+    "Collector": "log_volumes/collector.csv"
+    "Detector": "log_volumes/detector.csv"
+    "Inspector": "log_volumes/inspector.csv"
+    "Prefilter": "log_volumes/prefilter.csv"
+    "Batch Handler (Batch)": "log_volumes/batch_handler_batch.csv"
+    "Batch Handler (Buffer)": "log_volumes/batch_handler_buffer.csv"
+
+entering_processed_total:
+  output_filename: "entering_processed_total.png"
+  files:
+    "Entering": "entering_processed/entering_total.csv"
+    "Processed": "entering_processed/processed_total.csv"
+
+entering_processed_per_time:
+  output_filename: "entering_processed_per_time.png"
+  files:
+    "Entering Second": "entering_processed/entering_per_second.csv"
+    "Entering Minute": "entering_processed/entering_per_minute.csv"
+    "Entering Hour": "entering_processed/entering_per_hour.csv"
+    "Processed Second": "entering_processed/processed_per_second.csv"
+    "Processed Minute": "entering_processed/processed_per_minute.csv"
+    "Processed Hour": "entering_processed/processed_per_hour.csv"
